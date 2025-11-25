@@ -3,63 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expo Construcción - NoCookie Fix</title>
+    <title>Expo Construcción - Neon Future</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Teko:wght@300;500;700&display=swap" rel="stylesheet">
     
     <style>
         body { margin: 0; overflow: hidden; background: #020205; font-family: 'Rajdhani', sans-serif; }
         
-        /* MENU */
+        /* PANTALLA DE CARGA */
         #blocker {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #001a33 0%, #000 100%);
+            background: radial-gradient(circle at center, #0b1021 0%, #000 100%);
             z-index: 99; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: #00d2ff;
+            color: #00d2ff; transition: opacity 0.5s;
         }
-        h1 { font-family: 'Teko', sans-serif; font-size: 6vw; margin: 0; color: #fff; text-shadow: 0 0 30px #00d2ff; text-transform: uppercase; }
+        h1 { font-family: 'Teko', sans-serif; font-size: 6vw; margin: 0; color: #fff; text-shadow: 0 0 30px #00d2ff; text-transform: uppercase; letter-spacing: 5px; }
         .instructions {
-            border: 1px solid #00d2ff; padding: 20px; background: rgba(0,0,0,0.6); 
-            margin-top: 20px; border-radius: 8px; text-align: center; color: white;
+            border: 1px solid #00d2ff; padding: 30px; background: rgba(0,10,20,0.8); 
+            margin-top: 20px; border-radius: 15px; text-align: center; color: white;
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.1);
         }
-        .key { border: 1px solid white; padding: 3px 8px; border-radius: 4px; font-weight: bold; color: #00d2ff; }
+        .key { border: 1px solid #fff; padding: 4px 10px; border-radius: 4px; font-weight: bold; color: #00d2ff; }
         #start-btn {
-            margin-top: 30px; padding: 15px 50px; font-size: 1.5rem; font-family: 'Teko', sans-serif;
+            margin-top: 40px; padding: 15px 60px; font-size: 2rem; font-family: 'Teko', sans-serif;
             background: transparent; border: 2px solid #00d2ff; color: #00d2ff; cursor: pointer; font-weight: bold; transition: 0.3s;
+            text-transform: uppercase; letter-spacing: 2px;
         }
-        #start-btn:hover { background: #00d2ff; color: #000; box-shadow: 0 0 40px #00d2ff; }
+        #start-btn:hover { background: #00d2ff; color: #000; box-shadow: 0 0 50px #00d2ff; }
 
         /* HUD */
         #crosshair {
-            position: absolute; top: 50%; left: 50%; width: 8px; height: 8px;
+            position: absolute; top: 50%; left: 50%; width: 6px; height: 6px;
             background: white; border-radius: 50%; transform: translate(-50%, -50%);
-            pointer-events: none; z-index: 10; opacity: 0.8;
+            pointer-events: none; z-index: 10; opacity: 0.8; box-shadow: 0 0 10px white;
         }
         #interaction-msg {
             position: absolute; bottom: 20%; width: 100%; text-align: center;
-            color: #fff; font-size: 1.5rem; font-weight: bold; display: none; text-shadow: 0 2px 4px black;
-            font-family: 'Teko'; letter-spacing: 2px;
+            color: #fff; font-size: 1.5rem; font-weight: bold; display: none; 
+            text-shadow: 0 0 10px #00d2ff; font-family: 'Teko'; letter-spacing: 2px;
         }
 
         /* MODAL */
         #stand-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center;
+            backdrop-filter: blur(10px);
         }
         .modal-card {
-            width: 90%; max-width: 1000px; height: 70vh; background: #0b1116; border: 2px solid #00d2ff;
-            display: flex; box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
+            width: 85%; max-width: 1200px; height: 70vh; background: #050505; 
+            border: 1px solid #333; display: flex; box-shadow: 0 0 100px rgba(0, 210, 255, 0.15);
+            border-radius: 12px; overflow: hidden;
         }
-        .vid-container { flex: 2; background: black; position: relative; display:flex; align-items:center; justify-content:center; }
+        .vid-container { flex: 2; background: #000; position: relative; display:flex; align-items:center; justify-content:center; }
         .vid-container iframe { width: 100%; height: 100%; border: none; }
         
-        .info-container { flex: 1; padding: 30px; color: #ccc; position: relative; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid #333; }
-        .info-container h2 { color: #00d2ff; font-family: 'Teko'; font-size: 3rem; margin: 0; line-height: 1; text-transform: uppercase;}
-        .close-btn { position: absolute; top: 10px; right: 20px; font-size: 2rem; color: white; background: none; border: none; cursor: pointer; }
-        .btn-link { display: block; padding: 15px; text-align: center; font-weight: bold; text-decoration: none; margin-top: 15px; font-family: 'Teko'; font-size: 1.4rem; transition: 0.3s; }
-        .btn-buy { background: #00d2ff; color: black; }
-        .btn-buy:hover { background: #fff; box-shadow: 0 0 20px #fff; }
-        .btn-doc { border: 1px solid #555; color: #aaa; }
+        .info-container { 
+            flex: 1; padding: 50px; color: #ccc; position: relative; display: flex; 
+            flex-direction: column; justify-content: center; border-left: 1px solid #222; 
+            background: linear-gradient(135deg, #0a0a0a 0%, #111 100%);
+        }
+        .info-container h2 { color: #fff; font-family: 'Teko'; font-size: 4rem; margin: 0 0 20px 0; line-height: 0.9; text-transform: uppercase;}
+        .info-container p { font-size: 1.1rem; line-height: 1.6; color: #888; margin-bottom: 40px; }
+        
+        .close-btn { position: absolute; top: 20px; right: 25px; font-size: 2.5rem; color: #444; background: none; border: none; cursor: pointer; transition: 0.3s; }
+        .close-btn:hover { color: #fff; transform: scale(1.1); }
+        
+        .btn-link { 
+            display: block; padding: 20px; text-align: center; font-weight: bold; text-decoration: none; 
+            margin-top: 15px; font-family: 'Teko'; font-size: 1.5rem; transition: 0.3s; letter-spacing: 1px;
+            border-radius: 4px; text-transform: uppercase;
+        }
+        .btn-buy { background: #00d2ff; color: #000; border: none; }
+        .btn-buy:hover { background: #fff; box-shadow: 0 0 30px rgba(255,255,255,0.4); }
+        .btn-doc { border: 1px solid #333; color: #666; background: transparent; }
         .btn-doc:hover { border-color: #fff; color: #fff; }
     </style>
 </head>
@@ -68,11 +84,11 @@
     <div id="blocker">
         <h1>EXPO CONSTRUCCIÓN</h1>
         <div class="instructions">
-            <p><span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span> para MOVERSE</p>
-            <p>MOUSE para MIRAR</p>
-            <p>CLIC para INTERACTUAR</p>
+            <p><span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span> MOVERSE</p>
+            <p>MOUSE - MIRAR</p>
+            <p>CLIC - ABRIR STAND</p>
         </div>
-        <button id="start-btn">INGRESAR</button>
+        <button id="start-btn">INGRESAR AL RECINTO</button>
     </div>
 
     <div id="crosshair"></div>
@@ -84,55 +100,51 @@
             <div class="info-container">
                 <button class="close-btn" onclick="closeModal()">×</button>
                 <h2 id="m-title">TITULO</h2>
-                <p>Información exclusiva y ofertas limitadas.</p>
-                <a id="m-buy" href="#" class="btn-link btn-buy" target="_blank">IR AL SITIO</a>
-                <a id="m-doc" href="#" class="btn-link btn-doc" target="_blank">BROCHURE</a>
+                <p>Descubre las últimas innovaciones y tecnologías aplicadas a la construcción moderna. Accede a contenido exclusivo y certificaciones internacionales.</p>
+                <a id="m-buy" href="#" class="btn-link btn-buy" target="_blank">ACCEDER A LA OFERTA</a>
+                <a id="m-doc" href="#" class="btn-link btn-doc" target="_blank">DESCARGAR PDF</a>
             </div>
         </div>
     </div>
 
     <script>
         // ======================================================================
-        //  SOLUCIÓN VIDEO: USAR 'youtube-nocookie.com'
+        // DATOS Y CONFIGURACIÓN
         // ======================================================================
         
-        // He cambiado el dominio a youtube-nocookie.com. Esto suele arreglar el error 153
-        // en entornos embebidos estrictos.
-        
-        const IFRAME_1 = `<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/mZ_uPr7rHT4?si=s-docLxR3NVd3Q5T" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
-        const IFRAME_2 = `<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/NbFwmRgeRaE?si=TNLoQdf-OTvXNuOY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
-        const IFRAME_3 = `<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/827OMBNYRKI?si=mCi4CvUeRVnzuqx9" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
-        const IFRAME_4 = `<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Q-pgvolirH8?si=Gu8FC9Xgymi-65IE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+        const IFRAME_TEMPLATE = (url) => `<iframe width="100%" height="100%" src="${url}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+
+        // Videos de ejemplo (repartidos)
+        const V1 = "https://www.youtube-nocookie.com/embed/mZ_uPr7rHT4?si=s-docLxR3NVd3Q5T";
+        const V2 = "https://www.youtube-nocookie.com/embed/NbFwmRgeRaE?si=TNLoQdf-OTvXNuOY";
+        const V3 = "https://www.youtube-nocookie.com/embed/827OMBNYRKI?si=mCi4CvUeRVnzuqx9";
+        const V4 = "https://www.youtube-nocookie.com/embed/Q-pgvolirH8?si=Gu8FC9Xgymi-65IE";
 
         const DATA = [
-            // --- IZQUIERDA (5 Stands) ---
-            // Fila Trasera (3)
-            { t: "BIM MANAGER", pos: "left-back", iframeCode: IFRAME_1 },
-            { t: "SEGURIDAD",   pos: "left-back", iframeCode: IFRAME_2 },
-            { t: "RESIDENCIA",  pos: "left-back", iframeCode: IFRAME_3 },
-            // Fila Delantera (2 - Huecos)
-            { t: "TOPOGRAFÍA",  pos: "left-front", iframeCode: IFRAME_4 },
-            { t: "MAQUINARIA",  pos: "left-front", iframeCode: IFRAME_1 }, 
+            // --- IZQUIERDA (Estilo PORTAL - Imagen 1) ---
+            { t: "BIM MANAGER", pos: "left-back", vid: V1, style: 'portal' },
+            { t: "SEGURIDAD",   pos: "left-back", vid: V2, style: 'portal' },
+            { t: "RESIDENCIA",  pos: "left-back", vid: V3, style: 'portal' },
+            { t: "TOPOGRAFÍA",  pos: "left-front", vid: V4, style: 'portal' },
+            { t: "MAQUINARIA",  pos: "left-front", vid: V1, style: 'portal' },
 
-            // --- DERECHA (5 Stands) ---
-            // Fila Trasera (3)
-            { t: "PRECIOS UNIT.", pos: "right-back", iframeCode: IFRAME_2 }, 
-            { t: "LEAN CONST.",   pos: "right-back", iframeCode: IFRAME_3 }, 
-            { t: "ESTRUCTURAS",   pos: "right-back", iframeCode: IFRAME_4 }, 
-            // Fila Delantera (2)
-            { t: "INSTALACIONES", pos: "right-front", iframeCode: IFRAME_1 }, 
-            { t: "INTERVENTORÍA", pos: "right-front", iframeCode: IFRAME_2 }, 
+            // --- DERECHA (Estilo POD - Imagen 2) ---
+            { t: "PRECIOS UNIT.", pos: "right-back", vid: V2, style: 'pod' }, 
+            { t: "LEAN CONST.",   pos: "right-back", vid: V3, style: 'pod' }, 
+            { t: "ESTRUCTURAS",   pos: "right-back", vid: V4, style: 'pod' }, 
+            { t: "INSTALACIONES", pos: "right-front", vid: V1, style: 'pod' }, 
+            { t: "INTERVENTORÍA", pos: "right-front", vid: V2, style: 'pod' }, 
 
             // --- PRINCIPAL (Fondo Centro) ---
-            { t: "MASTER GERENCIA", pos: "center", iframeCode: IFRAME_3 },
+            { t: "MASTER GERENCIA", pos: "center", vid: V3, style: 'center-screen' },
 
-            // --- SALIDAS (Atrás - ACERCADAS) ---
-            { t: "SALIDA: LANDING", pos: "exit-center", link: "https://google.com" }, 
-            { t: "OTRA PAGINA 1",   pos: "exit-left", link: "#" }, 
-            { t: "OTRA PAGINA 2",   pos: "exit-right", link: "#" } 
+            // --- SALIDAS ---
+            { t: "SALIDA: LANDING", pos: "exit-center", link: "https://google.com", style: 'exit' }, 
+            { t: "PAGINA WEB",      pos: "exit-left", link: "#", style: 'exit' }, 
+            { t: "CONTACTO",        pos: "exit-right", link: "#", style: 'exit' } 
         ];
 
-        // POINTER LOCK CONTROLS
+        // Inyección de Controles
         THREE.PointerLockControls=function(t,e){if(void 0===e&&(e=document.body),this.domElement=e,this.isLocked=!1,this.minPolarAngle=0,this.maxPolarAngle=Math.PI,this.pointerSpeed=1.0,!(t instanceof THREE.Camera))throw new Error("THREE.PointerLockControls: First parameter must be a camera.");var n=this,o={type:"change"},r={type:"lock"},i={type:"unlock"},c=new THREE.Euler(0,0,0,"YXZ"),s=Math.PI/2,a=new THREE.Vector3;function l(e){if(!1!==n.isLocked){var r=e.movementX||e.mozMovementX||e.webkitMovementX||0,i=e.movementY||e.mozMovementY||e.webkitMovementY||0;c.setFromQuaternion(t.quaternion),c.y-=r*.002*n.pointerSpeed,c.x-=i*.002*n.pointerSpeed,c.x=Math.max(s-n.maxPolarAngle,Math.min(s-n.minPolarAngle,c.x)),t.quaternion.setFromEuler(c),n.dispatchEvent(o)}}function u(){n.domElement.ownerDocument.pointerLockElement===n.domElement?(n.dispatchEvent(r),n.isLocked=!0):(n.dispatchEvent(i),n.isLocked=!1)}this.connect=function(){n.domElement.ownerDocument.addEventListener("mousemove",l,!1),n.domElement.ownerDocument.addEventListener("pointerlockchange",u,!1)},this.disconnect=function(){n.domElement.ownerDocument.removeEventListener("mousemove",l,!1),n.domElement.ownerDocument.removeEventListener("pointerlockchange",u,!1)},this.dispose=function(){this.disconnect()},this.getObject=function(){return t},this.getDirection=function(){var e=new THREE.Vector3(0,0,-1);return function(n){return n.copy(e).applyQuaternion(t.quaternion)}}(),this.moveForward=function(e){a.setFromMatrixColumn(t.matrix,0),a.crossVectors(t.up,a),t.position.addScaledVector(a,e)},this.moveRight=function(e){a.setFromMatrixColumn(t.matrix,0),t.position.addScaledVector(a,e)},this.lock=function(){this.domElement.requestPointerLock()},this.unlock=function(){n.domElement.ownerDocument.exitPointerLock()},this.connect()};THREE.PointerLockControls.prototype=Object.create(THREE.EventDispatcher.prototype),THREE.PointerLockControls.prototype.constructor=THREE.PointerLockControls;
 
         let camera, scene, renderer, controls, raycaster;
@@ -141,46 +153,43 @@
         const velocity = new THREE.Vector3();
         const direction = new THREE.Vector3();
         const interactables = []; 
-        const screensToRotate = [];
+        const screensToRotate = []; // Array para objetos que miran al jugador
         let hovered = null;
-        const textureLoader = new THREE.TextureLoader();
-
-        // Contadores para layout
-        let leftBackCount = 0, leftFrontCount = 0;
-        let rightBackCount = 0, rightFrontCount = 0;
+        
+        // Contadores para layout automático
+        let lb=0, lf=0, rb=0, rf=0;
 
         init();
         animate();
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0a1a); 
-            scene.fog = new THREE.Fog(0x0a0a1a, 20, 100);
+            scene.background = new THREE.Color(0x050505); 
+            scene.fog = new THREE.FogExp2(0x050505, 0.015); // Niebla densa al fondo
 
-            // CÁMARA: Z=35
             camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
             camera.position.set(0, 1.7, 35);
 
-            const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+            // ILUMINACIÓN DRAMÁTICA
+            const ambient = new THREE.AmbientLight(0xffffff, 0.1); // Muy baja para resaltar neones
             scene.add(ambient);
             
-            const centerL = new THREE.PointLight(0x00d2ff, 1, 60);
-            centerL.position.set(0, 15, -20);
-            scene.add(centerL);
-
-            const exitL = new THREE.PointLight(0x0055ff, 0.8, 40);
-            exitL.position.set(0, 10, 45);
-            scene.add(exitL);
+            // Focos de área para dar ambiente general
+            const areaLight = new THREE.PointLight(0x0044ff, 0.5, 100);
+            areaLight.position.set(0, 20, 0);
+            scene.add(areaLight);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
+            // Activar brillo (glow) simulado con materiales
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
             document.body.appendChild(renderer.domElement);
 
             controls = new THREE.PointerLockControls(camera, document.body);
             document.getElementById('start-btn').addEventListener('click', () => controls.lock());
-            controls.addEventListener('lock', () => document.getElementById('blocker').style.display = 'none');
+            controls.addEventListener('lock', () => document.getElementById('blocker').style.opacity = 0);
             controls.addEventListener('unlock', () => {
-                if(document.getElementById('stand-modal').style.display !== 'flex') document.getElementById('blocker').style.display = 'flex';
+                if(document.getElementById('stand-modal').style.display !== 'flex') document.getElementById('blocker').style.opacity = 1;
             });
 
             document.addEventListener('keydown', (e) => onKey(e, true));
@@ -204,111 +213,214 @@
         }
 
         function buildEnvironment() {
-            const c = document.createElement('canvas'); c.width=512; c.height=512;
-            const ctx = c.getContext('2d');
-            ctx.fillStyle='#050510'; ctx.fillRect(0,0,512,512);
-            ctx.strokeStyle='#00d2ff'; ctx.lineWidth=3; ctx.beginPath();
-            for(let i=0; i<=512; i+=128) { ctx.moveTo(i,0); ctx.lineTo(i,512); ctx.moveTo(0,i); ctx.lineTo(512,i); } ctx.stroke();
-            ctx.strokeStyle='#003355'; ctx.lineWidth=1; ctx.beginPath();
-            for(let i=0; i<=512; i+=32) { ctx.moveTo(i,0); ctx.lineTo(i,512); ctx.moveTo(0,i); ctx.lineTo(512,i); } ctx.stroke();
-            
-            const tex = new THREE.CanvasTexture(c);
-            tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-            tex.repeat.set(40,40);
-            const plane = new THREE.Mesh(new THREE.PlaneGeometry(400,400), new THREE.MeshStandardMaterial({ map: tex, roughness:0.4, metalness:0.6 }));
-            plane.rotation.x = -Math.PI/2;
-            scene.add(plane);
+            // 1. SUELO DE ESPEJO (Glossy Floor)
+            const floorGeo = new THREE.PlaneGeometry(500, 500);
+            const floorMat = new THREE.MeshStandardMaterial({ 
+                color: 0x0a0a0a, 
+                roughness: 0.1, // Muy liso para reflejar
+                metalness: 0.8 
+            });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI/2;
+            scene.add(floor);
 
-            const skyGeo = new THREE.SphereGeometry(200, 64, 64);
-            const skyTex = textureLoader.load('https://images.unsplash.com/photo-1570284613060-766c33850e00?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y2llbG8lMjBlc3RyZWxsYWRvfGVufDB8fDB8fHww');
-            const skyMat = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, fog: false });
-            const sky = new THREE.Mesh(skyGeo, skyMat);
-            scene.add(sky);
+            // 2. GRID NEON EN EL SUELO
+            const gridHelper = new THREE.GridHelper(500, 100, 0x002244, 0x001122);
+            gridHelper.position.y = 0.01;
+            scene.add(gridHelper);
+
+            // 3. COLUMNAS DE LUZ LEJANAS (Para llenar el vacío lateral)
+            const colGeo = new THREE.BoxGeometry(1, 50, 1);
+            const colMat = new THREE.MeshBasicMaterial({ color: 0x001133 });
+            
+            for(let z=50; z>-100; z-=20) {
+                // Izquierda
+                const c1 = new THREE.Mesh(colGeo, colMat); c1.position.set(-60, 25, z); scene.add(c1);
+                // Derecha
+                const c2 = new THREE.Mesh(colGeo, colMat); c2.position.set(60, 25, z); scene.add(c2);
+                
+                // Luz puntual tenue en cada columna
+                const l = new THREE.PointLight(0x0044ff, 0.5, 20);
+                l.position.set(-60, 5, z); scene.add(l);
+                const l2 = l.clone(); l2.position.set(60, 5, z); scene.add(l2);
+            }
         }
 
-        function createBannerTex(text, color, bgColor) {
+        // --- CONSTRUCTOR DE PANTALLA (Canvas Texture) ---
+        function createScreenTexture(text) {
             const cvs = document.createElement('canvas'); cvs.width=512; cvs.height=256;
             const ctx = cvs.getContext('2d');
-            ctx.fillStyle = bgColor || 'rgba(0,5,15,0.95)'; ctx.fillRect(0,0,512,256);
-            ctx.shadowBlur = 20; ctx.shadowColor = color;
-            ctx.strokeStyle = color; ctx.lineWidth=10; ctx.strokeRect(10,10,492,236);
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = 'white'; ctx.font = 'bold 48px Arial'; 
+            // Fondo pantalla
+            ctx.fillStyle = '#000'; ctx.fillRect(0,0,512,256);
+            // Brillo central
+            const grd = ctx.createRadialGradient(256,128,10, 256,128,200);
+            grd.addColorStop(0, '#001a33'); grd.addColorStop(1, '#000000');
+            ctx.fillStyle = grd; ctx.fillRect(0,0,512,256);
+            // Texto
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 50px Arial'; 
             ctx.textAlign = 'center'; ctx.textBaseline='middle';
-            ctx.fillText(text, 256, 128);
+            ctx.fillText(text, 256, 110);
+            // Icono Play
+            ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.moveTo(240,150); ctx.lineTo(280,170); ctx.lineTo(240,190); ctx.fill();
+            
             return new THREE.CanvasTexture(cvs);
+        }
+
+        // --- ESTILO 1: PORTAL HEXAGONAL (IZQUIERDA) ---
+        function buildPortalStand(group, data) {
+            const neonBlue = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+            const darkMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2 });
+            const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+
+            // 1. Base Hexagonal (3 Escalones)
+            for(let i=0; i<3; i++) {
+                const r = 3.5 - (i*0.5);
+                const geo = new THREE.CylinderGeometry(r, r, 0.2, 6);
+                const mesh = new THREE.Mesh(geo, darkMat);
+                mesh.position.y = i*0.2;
+                group.add(mesh);
+                // Borde luz
+                const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.02, 8, 6), neonBlue);
+                ring.rotation.x = Math.PI/2; ring.position.y = i*0.2 + 0.1;
+                group.add(ring);
+            }
+
+            // 2. Arco Angular (Estilo Portal)
+            // Pilares inclinados
+            const pilarGeo = new THREE.BoxGeometry(0.6, 5, 0.6);
+            const leftP = new THREE.Mesh(pilarGeo, whiteMat);
+            leftP.position.set(-2, 2.5, -1); leftP.rotation.z = -0.2; group.add(leftP);
+            
+            const rightP = new THREE.Mesh(pilarGeo, whiteMat);
+            rightP.position.set(2, 2.5, -1); rightP.rotation.z = 0.2; group.add(rightP);
+
+            // Tiras de neón en los pilares
+            const neonStrip = new THREE.BoxGeometry(0.1, 5, 0.1);
+            const n1 = new THREE.Mesh(neonStrip, neonBlue); n1.position.set(-1.7, 2.5, -0.7); n1.rotation.z=-0.2; group.add(n1);
+            const n2 = new THREE.Mesh(neonStrip, neonBlue); n2.position.set(1.7, 2.5, -0.7); n2.rotation.z=0.2; group.add(n2);
+
+            // Dintel superior
+            const topGeo = new THREE.BoxGeometry(3, 0.6, 0.6);
+            const top = new THREE.Mesh(topGeo, whiteMat);
+            top.position.set(0, 4.8, -1);
+            group.add(top);
+
+            // 3. Pantalla Flotante (Interactiva)
+            const screenGeo = new THREE.PlaneGeometry(2.8, 1.6);
+            const screenTex = createScreenTexture(data.t);
+            const screenMat = new THREE.MeshBasicMaterial({ map: screenTex });
+            const screen = new THREE.Mesh(screenGeo, screenMat);
+            screen.position.set(0, 3, -1);
+            screen.userData = { data: data };
+            
+            // Agregar a listas
+            interactables.push(screen);
+            group.add(screen);
+            
+            // Luz del stand
+            const light = new THREE.PointLight(0x00ffff, 1, 10);
+            light.position.set(0, 4, 2);
+            group.add(light);
+        }
+
+        // --- ESTILO 2: POD CIRCULAR (DERECHA) ---
+        function buildPodStand(group, data) {
+            const neonWhite = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const whitePlastic = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.1 });
+            const glowBlue = new THREE.MeshBasicMaterial({ color: 0x0088ff, transparent:true, opacity:0.5 });
+
+            // 1. Base Curva
+            const baseGeo = new THREE.CylinderGeometry(3.5, 3.5, 0.4, 32);
+            const base = new THREE.Mesh(baseGeo, whitePlastic);
+            base.position.y = 0.2;
+            group.add(base);
+            
+            // Borde luz base
+            const ringGeo = new THREE.TorusGeometry(3.5, 0.05, 16, 64);
+            const ring = new THREE.Mesh(ringGeo, neonWhite);
+            ring.rotation.x = Math.PI/2; ring.position.y = 0.4;
+            group.add(ring);
+
+            // 2. Anillo Gigante (Cápsula)
+            const hoopGeo = new THREE.TorusGeometry(3, 0.3, 16, 64);
+            const hoop = new THREE.Mesh(hoopGeo, whitePlastic);
+            hoop.position.set(0, 3.2, -1);
+            // Aplastar un poco la base del anillo
+            hoop.scale.y = 1.1;
+            group.add(hoop);
+
+            // Luz interna del anillo
+            const hoopLight = new THREE.Mesh(new THREE.TorusGeometry(3, 0.1, 16, 64), neonWhite);
+            hoopLight.position.set(0, 3.2, -0.7); hoopLight.scale.y = 1.1;
+            group.add(hoopLight);
+
+            // 3. Asiento/Mesa orgánica
+            const desk = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 16, 0, Math.PI), whitePlastic);
+            desk.rotation.x = -Math.PI/2; desk.scale.set(1, 0.5, 1); desk.position.set(0, 0.8, 0.5);
+            group.add(desk);
+
+            // 4. Pantalla Circular (Dentro del anillo)
+            const screenGeo = new THREE.CircleGeometry(2.5, 32);
+            const screenTex = createScreenTexture(data.t);
+            const screenMat = new THREE.MeshBasicMaterial({ map: screenTex });
+            const screen = new THREE.Mesh(screenGeo, screenMat);
+            screen.position.set(0, 3.2, -1);
+            screen.userData = { data: data };
+
+            interactables.push(screen);
+            group.add(screen);
+
+            const light = new THREE.PointLight(0x0088ff, 1, 10);
+            light.position.set(0, 3, 2);
+            group.add(light);
         }
 
         function buildLayout() {
             DATA.forEach(d => {
                 const group = new THREE.Group();
-                let x=0, z=0, w=6, h=3.5, color='#00d2ff', rot=0;
-                let bgColor = null;
+                let x=0, z=0, rot=0;
 
-                // LAYOUT ZIG-ZAG (3 Atrás, 2 Adelante)
-                
+                // POSICIONAMIENTO ZIG-ZAG
                 if(d.pos === 'left-back') {
-                    const idx = leftBackCount++; 
-                    z = 10 - (idx * 12); 
-                    x = -22; 
-                    rot = Math.PI / 4;
-                } 
-                else if (d.pos === 'left-front') {
-                    const idx = leftFrontCount++;
-                    z = 4 - (idx * 12); 
-                    x = -12; 
-                    rot = Math.PI / 6;
-                }
-                else if(d.pos === 'right-back') {
-                    const idx = rightBackCount++;
-                    z = 10 - (idx * 12);
-                    x = 22;
-                    rot = -Math.PI / 4;
-                }
-                else if(d.pos === 'right-front') {
-                    const idx = rightFrontCount++;
-                    z = 4 - (idx * 12);
-                    x = 12;
-                    rot = -Math.PI / 6;
-                }
-                else if(d.pos === 'center') {
-                    x = 0; z = -40; w=16; h=7; color='#ffaa00'; rot = 0;
-                }
-                else if(d.pos.includes('exit')) {
-                    // SALIDAS APEGADAS (DE 45 A 38)
-                    z = 38; h=4; color='#0055ff'; rot = Math.PI; bgColor='rgba(0,20,100,0.9)';
-                    if(d.pos === 'exit-center') { x=0; w=10; }
-                    if(d.pos === 'exit-left') { x=-12; w=6; }
-                    if(d.pos === 'exit-right') { x=12; w=6; }
+                    z = 12 - (lb++ * 14); x = -20; rot = Math.PI/5;
+                } else if (d.pos === 'left-front') {
+                    z = 6 - (lf++ * 14); x = -10; rot = Math.PI/8;
+                } else if(d.pos === 'right-back') {
+                    z = 12 - (rb++ * 14); x = 20; rot = -Math.PI/5;
+                } else if(d.pos === 'right-front') {
+                    z = 6 - (rf++ * 14); x = 10; rot = -Math.PI/8;
+                } else if(d.pos === 'center') {
+                    x = 0; z = -40; rot = 0;
+                } else if(d.pos.includes('exit')) {
+                    z = 38; rot = Math.PI;
+                    if(d.pos.includes('center')) x=0;
+                    if(d.pos.includes('left')) x=-10;
+                    if(d.pos.includes('right')) x=10;
                 }
 
                 group.position.set(x, 0, z);
                 group.rotation.y = rot;
 
-                if(!d.pos.includes('exit')) {
-                    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, h/2, 8), new THREE.MeshBasicMaterial({color:0x222}));
-                    pole.position.y = h/4;
-                    group.add(pole);
+                // CONSTRUIR SEGÚN ESTILO
+                if(d.style === 'portal') {
+                    buildPortalStand(group, d);
+                } 
+                else if (d.style === 'pod') {
+                    buildPodStand(group, d);
                 }
-
-                const bannerTex = createBannerTex(d.t, color, bgColor);
-                const bannerMat = new THREE.MeshBasicMaterial({ map: bannerTex, side: THREE.DoubleSide });
-                const banner = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bannerMat);
-                banner.position.y = h; 
-                
-                banner.userData = { data: d };
-                interactables.push(banner);
-                
-                if(!d.pos.includes('exit')) {
-                    screensToRotate.push(banner);
+                else if (d.style === 'center-screen') {
+                    // Stand Central Simple pero Grande
+                    const wall = new THREE.Mesh(new THREE.BoxGeometry(16, 8, 1), new THREE.MeshStandardMaterial({color:0x222}));
+                    wall.position.y=4; group.add(wall);
+                    const sc = new THREE.Mesh(new THREE.PlaneGeometry(14, 7), new THREE.MeshBasicMaterial({map:createScreenTexture(d.t)}));
+                    sc.position.set(0,4,0.6); sc.userData={data:d}; interactables.push(sc); group.add(sc);
                 }
-
-                group.add(banner);
-                
-                if(!d.pos.includes('exit')) {
-                    const light = new THREE.PointLight(color, 0.5, 8);
-                    light.position.set(0, h, 2);
-                    group.add(light);
+                else if (d.style === 'exit') {
+                    // Salida Simple
+                    const box = new THREE.Mesh(new THREE.BoxGeometry(6, 4, 0.5), new THREE.MeshBasicMaterial({color:0x0022aa}));
+                    box.position.y=2; group.add(box);
+                    const txt = new THREE.Mesh(new THREE.PlaneGeometry(5,2), new THREE.MeshBasicMaterial({map:createScreenTexture(d.t)}));
+                    txt.position.set(0,2,0.3); txt.userData={data:d}; interactables.push(txt); group.add(txt);
                 }
 
                 scene.add(group);
@@ -331,18 +443,13 @@
 
         function openModal(d) {
             document.getElementById('m-title').innerText = d.t;
-            document.getElementById('m-buy').href = d.buy || "#";
-            
-            // INYECCIÓN DIRECTA CON NO-COOKIE
-            const wrapper = document.getElementById('video-wrapper');
-            wrapper.innerHTML = d.iframeCode;
-            
+            document.getElementById('video-wrapper').innerHTML = IFRAME_TEMPLATE(d.vid);
             document.getElementById('stand-modal').style.display = 'flex';
         }
 
         window.closeModal = function() {
             document.getElementById('stand-modal').style.display = 'none';
-            document.getElementById('video-wrapper').innerHTML = ''; // Limpiar y detener video
+            document.getElementById('video-wrapper').innerHTML = '';
             controls.lock();
         }
 
@@ -356,10 +463,15 @@
             requestAnimationFrame(animate);
             const time = performance.now();
 
-            const target = camera.position.clone();
-            target.y = 3.5; 
-            screensToRotate.forEach(obj => {
-                obj.lookAt(target); 
+            // Rotación de objetos interactivos hacia el usuario (LookAt)
+            // Esto asegura que siempre veas la pantalla de frente
+            interactables.forEach(obj => {
+                if(obj.parent) {
+                    // Solo giramos la pantalla localmente, o el grupo si es necesario
+                    // Para este diseño, las pantallas están integradas, así que no giramos
+                    // Pero si quieres efecto "seguimiento", descomenta:
+                    // obj.lookAt(camera.position);
+                }
             });
             
             if(controls.isLocked) {
@@ -368,18 +480,16 @@
                 const msg = document.getElementById('interaction-msg');
                 const ch = document.getElementById('crosshair');
 
-                if(intersects.length > 0 && intersects[0].distance < 25) {
+                if(intersects.length > 0 && intersects[0].distance < 20) {
                     hovered = intersects[0].object;
-                    const d = hovered.userData.data;
-                    msg.innerText = d.pos.includes('exit') ? "SALIR" : "VER VIDEO";
                     msg.style.display = 'block';
                     ch.style.transform = 'translate(-50%,-50%) scale(2)';
-                    ch.style.backgroundColor = d.pos.includes('exit') ? '#0055ff' : '#00d2ff';
+                    ch.style.background = '#00ffff';
                 } else {
                     hovered = null;
                     msg.style.display = 'none';
                     ch.style.transform = 'translate(-50%,-50%) scale(1)';
-                    ch.style.backgroundColor = 'white';
+                    ch.style.background = 'white';
                 }
 
                 const delta = (time - prevTime) / 1000;
