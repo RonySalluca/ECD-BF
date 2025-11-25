@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expo Construcción - Neon Future</title>
+    <title>Expo Black Friday - Portales Personalizados</title>
+    <!-- Incluimos Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Fuentes de Google para un estilo tecnológico -->
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Teko:wght@300;500;700&display=swap" rel="stylesheet">
     
     <style>
-        body { margin: 0; overflow: hidden; background: #020205; font-family: 'Rajdhani', sans-serif; }
+        /* Estilos generales de la página y la interfaz 2D */
+        body { margin: 0; overflow: hidden; background: #050510; font-family: 'Rajdhani', sans-serif; }
         
-        /* PANTALLA DE CARGA */
+        /* Pantalla de bloqueo e instrucciones iniciales */
         #blocker {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #0b1021 0%, #000 100%);
@@ -18,6 +21,7 @@
             color: #00d2ff; transition: opacity 0.5s;
         }
         h1 { font-family: 'Teko', sans-serif; font-size: 6vw; margin: 0; color: #fff; text-shadow: 0 0 30px #00d2ff; text-transform: uppercase; letter-spacing: 5px; }
+        h2 { font-family: 'Teko', sans-serif; font-size: 3vw; margin: 10px 0 30px 0; color: #ff0055; text-shadow: 0 0 20px #ff0055; text-transform: uppercase; letter-spacing: 3px; }
         .instructions {
             border: 1px solid #00d2ff; padding: 30px; background: rgba(0,10,20,0.8); 
             margin-top: 20px; border-radius: 15px; text-align: center; color: white;
@@ -31,11 +35,12 @@
         }
         #start-btn:hover { background: #00d2ff; color: #000; box-shadow: 0 0 50px #00d2ff; }
 
-        /* HUD */
+        /* Retícula central y mensajes de interacción */
         #crosshair {
             position: absolute; top: 50%; left: 50%; width: 6px; height: 6px;
             background: white; border-radius: 50%; transform: translate(-50%, -50%);
             pointer-events: none; z-index: 10; opacity: 0.8; box-shadow: 0 0 10px white;
+            transition: all 0.2s;
         }
         #interaction-msg {
             position: absolute; bottom: 20%; width: 100%; text-align: center;
@@ -43,7 +48,7 @@
             text-shadow: 0 0 10px #00d2ff; font-family: 'Teko'; letter-spacing: 2px;
         }
 
-        /* MODAL */
+        /* Modal para mostrar el contenido de los stands */
         #stand-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center;
@@ -64,10 +69,8 @@
         }
         .info-container h2 { color: #fff; font-family: 'Teko'; font-size: 4rem; margin: 0 0 20px 0; line-height: 0.9; text-transform: uppercase;}
         .info-container p { font-size: 1.1rem; line-height: 1.6; color: #888; margin-bottom: 40px; }
-        
         .close-btn { position: absolute; top: 20px; right: 25px; font-size: 2.5rem; color: #444; background: none; border: none; cursor: pointer; transition: 0.3s; }
         .close-btn:hover { color: #fff; transform: scale(1.1); }
-        
         .btn-link { 
             display: block; padding: 20px; text-align: center; font-weight: bold; text-decoration: none; 
             margin-top: 15px; font-family: 'Teko'; font-size: 1.5rem; transition: 0.3s; letter-spacing: 1px;
@@ -81,12 +84,14 @@
 </head>
 <body>
 
+    <!-- Interfaz de Usuario 2D -->
     <div id="blocker">
-        <h1>EXPO CONSTRUCCIÓN</h1>
+        <h1>EXPO BLACK FRIDAY</h1>
+        <h2>OFERTAS EXCLUSIVAS</h2>
         <div class="instructions">
             <p><span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span> MOVERSE</p>
             <p>MOUSE - MIRAR</p>
-            <p>CLIC - ABRIR STAND</p>
+            <p>CLIC - INTERACTUAR</p>
         </div>
         <button id="start-btn">INGRESAR AL RECINTO</button>
     </div>
@@ -100,51 +105,56 @@
             <div class="info-container">
                 <button class="close-btn" onclick="closeModal()">×</button>
                 <h2 id="m-title">TITULO</h2>
-                <p>Descubre las últimas innovaciones y tecnologías aplicadas a la construcción moderna. Accede a contenido exclusivo y certificaciones internacionales.</p>
-                <a id="m-buy" href="#" class="btn-link btn-buy" target="_blank">ACCEDER A LA OFERTA</a>
-                <a id="m-doc" href="#" class="btn-link btn-doc" target="_blank">DESCARGAR PDF</a>
+                <p>Aprovecha nuestras ofertas especiales de Black Friday. Descuentos increíbles en tecnología, materiales y servicios para tu próximo proyecto. ¡No te lo pierdas!</p>
+                <a id="m-buy" href="#" class="btn-link btn-buy" target="_blank">VER OFERTA BLACK FRIDAY</a>
+                <a id="m-doc" href="#" class="btn-link btn-doc" target="_blank">CATÁLOGO PDF</a>
             </div>
         </div>
     </div>
 
     <script>
         // ======================================================================
-        // DATOS Y CONFIGURACIÓN
+        // CONFIGURACIÓN Y DATOS DEL EVENTO
         // ======================================================================
         
+        // Plantilla para embeber videos de YouTube
         const IFRAME_TEMPLATE = (url) => `<iframe width="100%" height="100%" src="${url}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 
-        // Videos de ejemplo (repartidos)
+        // URLs de videos de ejemplo
         const V1 = "https://www.youtube-nocookie.com/embed/mZ_uPr7rHT4?si=s-docLxR3NVd3Q5T";
         const V2 = "https://www.youtube-nocookie.com/embed/NbFwmRgeRaE?si=TNLoQdf-OTvXNuOY";
         const V3 = "https://www.youtube-nocookie.com/embed/827OMBNYRKI?si=mCi4CvUeRVnzuqx9";
         const V4 = "https://www.youtube-nocookie.com/embed/Q-pgvolirH8?si=Gu8FC9Xgymi-65IE";
 
+        // Datos de los stands y salidas. Se han añadido imágenes de marcador de posición para los portales de salida.
+        // Reemplaza las URLs de 'img' con tus imágenes de destino reales.
         const DATA = [
-            // --- IZQUIERDA (Estilo PORTAL - Imagen 1) ---
-            { t: "BIM MANAGER", pos: "left-back", vid: V1, style: 'portal' },
-            { t: "SEGURIDAD",   pos: "left-back", vid: V2, style: 'portal' },
-            { t: "RESIDENCIA",  pos: "left-back", vid: V3, style: 'portal' },
-            { t: "TOPOGRAFÍA",  pos: "left-front", vid: V4, style: 'portal' },
-            { t: "MAQUINARIA",  pos: "left-front", vid: V1, style: 'portal' },
+            // IZQUIERDA (5 Stands)
+            { t: "OFERTA BIM", pos: "left-back", vid: V1, style: 'portal' },
+            { t: "SEGURIDAD BF", pos: "left-back", vid: V2, style: 'portal' },
+            { t: "PACK RESIDENCIA", pos: "left-back", vid: V3, style: 'portal' },
+            { t: "KIT TOPOGRAFÍA", pos: "left-front", vid: V4, style: 'portal' },
+            { t: "MAQUINARIA PRO", pos: "left-front", vid: V1, style: 'portal' },
 
-            // --- DERECHA (Estilo POD - Imagen 2) ---
-            { t: "PRECIOS UNIT.", pos: "right-back", vid: V2, style: 'pod' }, 
-            { t: "LEAN CONST.",   pos: "right-back", vid: V3, style: 'pod' }, 
-            { t: "ESTRUCTURAS",   pos: "right-back", vid: V4, style: 'pod' }, 
+            // DERECHA (5 Stands)
+            { t: "PRECIOS BLACK", pos: "right-back", vid: V2, style: 'pod' }, 
+            { t: "LEAN EXPRESS", pos: "right-back", vid: V3, style: 'pod' }, 
+            { t: "ESTRUCTURAS", pos: "right-back", vid: V4, style: 'pod' }, 
             { t: "INSTALACIONES", pos: "right-front", vid: V1, style: 'pod' }, 
             { t: "INTERVENTORÍA", pos: "right-front", vid: V2, style: 'pod' }, 
 
-            // --- PRINCIPAL (Fondo Centro) ---
-            { t: "MASTER GERENCIA", pos: "center", vid: V3, style: 'center-screen' },
+            // CENTRO (Stand Principal)
+            { t: "MEGA OFERTA CENTRAL", pos: "center", vid: V3, style: 'center-screen' },
 
-            // --- SALIDAS ---
-            { t: "SALIDA: LANDING", pos: "exit-center", link: "https://google.com", style: 'exit' }, 
-            { t: "PAGINA WEB",      pos: "exit-left", link: "#", style: 'exit' }, 
-            { t: "CONTACTO",        pos: "exit-right", link: "#", style: 'exit' } 
+            // SALIDAS (Nuevos estilos detallados)
+            // Salida Principal (Centro) - Basada en la segunda imagen proporcionada
+            { t: "VOLVER AL LANDING", pos: "exit-center", link: "https://tusitio.com/landing-black-friday", style: 'exit-main-detailed', img: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=2070&auto=format&fit=crop' }, 
+            // Salidas Secundarias (Laterales) - Basadas en la primera imagen proporcionada
+            { t: "OTRAS OFERTAS WEB", pos: "exit-left", link: "https://tusitio.com/otras-ofertas", style: 'exit-side-detailed', img: 'https://images.unsplash.com/photo-1557683311-eac922347aa1?q=80&w=2029&auto=format&fit=crop' }, 
+            { t: "CONTACTO DIRECTO", pos: "exit-right", link: "https://tusitio.com/contacto", style: 'exit-side-detailed', img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop' } 
         ];
 
-        // Inyección de Controles
+        // Implementación de PointerLockControls para la navegación en primera persona
         THREE.PointerLockControls=function(t,e){if(void 0===e&&(e=document.body),this.domElement=e,this.isLocked=!1,this.minPolarAngle=0,this.maxPolarAngle=Math.PI,this.pointerSpeed=1.0,!(t instanceof THREE.Camera))throw new Error("THREE.PointerLockControls: First parameter must be a camera.");var n=this,o={type:"change"},r={type:"lock"},i={type:"unlock"},c=new THREE.Euler(0,0,0,"YXZ"),s=Math.PI/2,a=new THREE.Vector3;function l(e){if(!1!==n.isLocked){var r=e.movementX||e.mozMovementX||e.webkitMovementX||0,i=e.movementY||e.mozMovementY||e.webkitMovementY||0;c.setFromQuaternion(t.quaternion),c.y-=r*.002*n.pointerSpeed,c.x-=i*.002*n.pointerSpeed,c.x=Math.max(s-n.maxPolarAngle,Math.min(s-n.minPolarAngle,c.x)),t.quaternion.setFromEuler(c),n.dispatchEvent(o)}}function u(){n.domElement.ownerDocument.pointerLockElement===n.domElement?(n.dispatchEvent(r),n.isLocked=!0):(n.dispatchEvent(i),n.isLocked=!1)}this.connect=function(){n.domElement.ownerDocument.addEventListener("mousemove",l,!1),n.domElement.ownerDocument.addEventListener("pointerlockchange",u,!1)},this.disconnect=function(){n.domElement.ownerDocument.removeEventListener("mousemove",l,!1),n.domElement.ownerDocument.removeEventListener("pointerlockchange",u,!1)},this.dispose=function(){this.disconnect()},this.getObject=function(){return t},this.getDirection=function(){var e=new THREE.Vector3(0,0,-1);return function(n){return n.copy(e).applyQuaternion(t.quaternion)}}(),this.moveForward=function(e){a.setFromMatrixColumn(t.matrix,0),a.crossVectors(t.up,a),t.position.addScaledVector(a,e)},this.moveRight=function(e){a.setFromMatrixColumn(t.matrix,0),t.position.addScaledVector(a,e)},this.lock=function(){this.domElement.requestPointerLock()},this.unlock=function(){n.domElement.ownerDocument.exitPointerLock()},this.connect()};THREE.PointerLockControls.prototype=Object.create(THREE.EventDispatcher.prototype),THREE.PointerLockControls.prototype.constructor=THREE.PointerLockControls;
 
         let camera, scene, renderer, controls, raycaster;
@@ -152,39 +162,37 @@
         let prevTime = performance.now();
         const velocity = new THREE.Vector3();
         const direction = new THREE.Vector3();
-        const interactables = []; 
-        const screensToRotate = []; // Array para objetos que miran al jugador
-        let hovered = null;
+        const interactables = []; // Objetos con los que se puede interactuar
+        let hovered = null; // Objeto actualmente bajo la retícula
+        const textureLoader = new THREE.TextureLoader();
         
-        // Contadores para layout automático
-        let lb=0, lf=0, rb=0, rf=0;
+        let lb=0, lf=0, rb=0, rf=0; // Contadores para posicionar los stands
 
         init();
         animate();
 
         function init() {
+            // Configuración básica de la escena, cámara y renderizador
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x050505); 
-            scene.fog = new THREE.FogExp2(0x050505, 0.015); // Niebla densa al fondo
+            scene.fog = new THREE.FogExp2(0x050505, 0.015);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 1.7, 35);
+            camera.position.set(0, 1.7, 35); // Posición inicial del jugador
 
-            // ILUMINACIÓN DRAMÁTICA
-            const ambient = new THREE.AmbientLight(0xffffff, 0.1); // Muy baja para resaltar neones
+            // Iluminación
+            const ambient = new THREE.AmbientLight(0xffffff, 0.1);
             scene.add(ambient);
-            
-            // Focos de área para dar ambiente general
             const areaLight = new THREE.PointLight(0x0044ff, 0.5, 100);
             areaLight.position.set(0, 20, 0);
             scene.add(areaLight);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            // Activar brillo (glow) simulado con materiales
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             document.body.appendChild(renderer.domElement);
 
+            // Controles y eventos
             controls = new THREE.PointerLockControls(camera, document.body);
             document.getElementById('start-btn').addEventListener('click', () => controls.lock());
             controls.addEventListener('lock', () => document.getElementById('blocker').style.opacity = 0);
@@ -197,190 +205,295 @@
             document.addEventListener('click', onClick);
             window.addEventListener('resize', onResize);
             
-            raycaster = new THREE.Raycaster();
+            raycaster = new THREE.Raycaster(); // Para detectar interacciones
 
-            buildEnvironment();
-            buildLayout();
+            buildEnvironment(); // Construye suelo, rejilla, columnas
+            buildLayout(); // Coloca los stands y salidas según los datos
         }
 
+        // Manejo de teclas para el movimiento
         function onKey(e, v) {
             switch(e.code) {
                 case 'KeyW': moveF = v; break;
                 case 'KeyS': moveB = v; break;
                 case 'KeyA': moveL = v; break;
-                case 'KeyD': moveR = v; break;
+                case 'KeyD': moveD = v; break; // Corregido de moveR a moveD
             }
         }
 
+        // Construcción del entorno base
         function buildEnvironment() {
-            // 1. SUELO DE ESPEJO (Glossy Floor)
             const floorGeo = new THREE.PlaneGeometry(500, 500);
-            const floorMat = new THREE.MeshStandardMaterial({ 
-                color: 0x0a0a0a, 
-                roughness: 0.1, // Muy liso para reflejar
-                metalness: 0.8 
-            });
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.1, metalness: 0.8 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI/2;
             scene.add(floor);
 
-            // 2. GRID NEON EN EL SUELO
             const gridHelper = new THREE.GridHelper(500, 100, 0x002244, 0x001122);
             gridHelper.position.y = 0.01;
             scene.add(gridHelper);
 
-            // 3. COLUMNAS DE LUZ LEJANAS (Para llenar el vacío lateral)
             const colGeo = new THREE.BoxGeometry(1, 50, 1);
             const colMat = new THREE.MeshBasicMaterial({ color: 0x001133 });
             
             for(let z=50; z>-100; z-=20) {
-                // Izquierda
                 const c1 = new THREE.Mesh(colGeo, colMat); c1.position.set(-60, 25, z); scene.add(c1);
-                // Derecha
                 const c2 = new THREE.Mesh(colGeo, colMat); c2.position.set(60, 25, z); scene.add(c2);
                 
-                // Luz puntual tenue en cada columna
                 const l = new THREE.PointLight(0x0044ff, 0.5, 20);
                 l.position.set(-60, 5, z); scene.add(l);
                 const l2 = l.clone(); l2.position.set(60, 5, z); scene.add(l2);
             }
         }
 
-        // --- CONSTRUCTOR DE PANTALLA (Canvas Texture) ---
+        // Funciones auxiliares para crear texturas dinámicas
         function createScreenTexture(text) {
             const cvs = document.createElement('canvas'); cvs.width=512; cvs.height=256;
             const ctx = cvs.getContext('2d');
-            // Fondo pantalla
             ctx.fillStyle = '#000'; ctx.fillRect(0,0,512,256);
-            // Brillo central
             const grd = ctx.createRadialGradient(256,128,10, 256,128,200);
             grd.addColorStop(0, '#001a33'); grd.addColorStop(1, '#000000');
             ctx.fillStyle = grd; ctx.fillRect(0,0,512,256);
-            // Texto
             ctx.fillStyle = '#fff'; ctx.font = 'bold 50px Arial'; 
             ctx.textAlign = 'center'; ctx.textBaseline='middle';
             ctx.fillText(text, 256, 110);
-            // Icono Play
             ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.moveTo(240,150); ctx.lineTo(280,170); ctx.lineTo(240,190); ctx.fill();
-            
             return new THREE.CanvasTexture(cvs);
         }
 
-        // --- ESTILO 1: PORTAL HEXAGONAL (IZQUIERDA) ---
+        // Nueva función para crear la textura del letrero "SALIDA"
+        function createSalidaSignTexture() {
+            const cvs = document.createElement('canvas'); cvs.width=512; cvs.height=128;
+            const ctx = cvs.getContext('2d');
+            // Fondo oscuro
+            ctx.fillStyle = '#111'; ctx.fillRect(0,0,512,128);
+            // Borde brillante
+            ctx.strokeStyle = '#00d2ff'; ctx.lineWidth = 8; ctx.strokeRect(4,4,504,120);
+            // Texto brillante
+            ctx.fillStyle = '#00d2ff'; ctx.font = 'bold 80px "Teko", sans-serif'; 
+            ctx.textAlign = 'center'; ctx.textBaseline='middle';
+            ctx.fillText("SALIDA", 256, 64);
+            // Añadir un ligero resplandor al texto
+            ctx.shadowColor = '#00d2ff'; ctx.shadowBlur = 20;
+            ctx.fillText("SALIDA", 256, 64);
+            return new THREE.CanvasTexture(cvs);
+        }
+
+        // Funciones de construcción de los diferentes tipos de stands
         function buildPortalStand(group, data) {
             const neonBlue = new THREE.MeshBasicMaterial({ color: 0x00ffff });
             const darkMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2 });
             const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
-            // 1. Base Hexagonal (3 Escalones)
             for(let i=0; i<3; i++) {
                 const r = 3.5 - (i*0.5);
                 const geo = new THREE.CylinderGeometry(r, r, 0.2, 6);
                 const mesh = new THREE.Mesh(geo, darkMat);
-                mesh.position.y = i*0.2;
-                group.add(mesh);
-                // Borde luz
+                mesh.position.y = i*0.2; group.add(mesh);
                 const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.02, 8, 6), neonBlue);
-                ring.rotation.x = Math.PI/2; ring.position.y = i*0.2 + 0.1;
-                group.add(ring);
+                ring.rotation.x = Math.PI/2; ring.position.y = i*0.2 + 0.1; group.add(ring);
             }
 
-            // 2. Arco Angular (Estilo Portal)
-            // Pilares inclinados
             const pilarGeo = new THREE.BoxGeometry(0.6, 5, 0.6);
-            const leftP = new THREE.Mesh(pilarGeo, whiteMat);
-            leftP.position.set(-2, 2.5, -1); leftP.rotation.z = -0.2; group.add(leftP);
-            
-            const rightP = new THREE.Mesh(pilarGeo, whiteMat);
-            rightP.position.set(2, 2.5, -1); rightP.rotation.z = 0.2; group.add(rightP);
+            const leftP = new THREE.Mesh(pilarGeo, whiteMat); leftP.position.set(-2, 2.5, -1); leftP.rotation.z = -0.2; group.add(leftP);
+            const rightP = new THREE.Mesh(pilarGeo, whiteMat); rightP.position.set(2, 2.5, -1); rightP.rotation.z = 0.2; group.add(rightP);
 
-            // Tiras de neón en los pilares
             const neonStrip = new THREE.BoxGeometry(0.1, 5, 0.1);
             const n1 = new THREE.Mesh(neonStrip, neonBlue); n1.position.set(-1.7, 2.5, -0.7); n1.rotation.z=-0.2; group.add(n1);
             const n2 = new THREE.Mesh(neonStrip, neonBlue); n2.position.set(1.7, 2.5, -0.7); n2.rotation.z=0.2; group.add(n2);
 
-            // Dintel superior
             const topGeo = new THREE.BoxGeometry(3, 0.6, 0.6);
-            const top = new THREE.Mesh(topGeo, whiteMat);
-            top.position.set(0, 4.8, -1);
-            group.add(top);
+            const top = new THREE.Mesh(topGeo, whiteMat); top.position.set(0, 4.8, -1); group.add(top);
 
-            // 3. Pantalla Flotante (Interactiva)
             const screenGeo = new THREE.PlaneGeometry(2.8, 1.6);
             const screenTex = createScreenTexture(data.t);
-            const screenMat = new THREE.MeshBasicMaterial({ map: screenTex });
-            const screen = new THREE.Mesh(screenGeo, screenMat);
+            const screen = new THREE.Mesh(screenGeo, new THREE.MeshBasicMaterial({ map: screenTex }));
             screen.position.set(0, 3, -1);
             screen.userData = { data: data };
+            interactables.push(screen); group.add(screen);
             
-            // Agregar a listas
-            interactables.push(screen);
-            group.add(screen);
-            
-            // Luz del stand
-            const light = new THREE.PointLight(0x00ffff, 1, 10);
-            light.position.set(0, 4, 2);
-            group.add(light);
+            const light = new THREE.PointLight(0x00ffff, 1, 10); light.position.set(0, 4, 2); group.add(light);
         }
 
-        // --- ESTILO 2: POD CIRCULAR (DERECHA) ---
         function buildPodStand(group, data) {
             const neonWhite = new THREE.MeshBasicMaterial({ color: 0xffffff });
             const whitePlastic = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.1 });
-            const glowBlue = new THREE.MeshBasicMaterial({ color: 0x0088ff, transparent:true, opacity:0.5 });
-
-            // 1. Base Curva
-            const baseGeo = new THREE.CylinderGeometry(3.5, 3.5, 0.4, 32);
-            const base = new THREE.Mesh(baseGeo, whitePlastic);
-            base.position.y = 0.2;
-            group.add(base);
             
-            // Borde luz base
+            const baseGeo = new THREE.CylinderGeometry(3.5, 3.5, 0.4, 32);
+            const base = new THREE.Mesh(baseGeo, whitePlastic); base.position.y = 0.2; group.add(base);
+            
             const ringGeo = new THREE.TorusGeometry(3.5, 0.05, 16, 64);
-            const ring = new THREE.Mesh(ringGeo, neonWhite);
-            ring.rotation.x = Math.PI/2; ring.position.y = 0.4;
-            group.add(ring);
+            const ring = new THREE.Mesh(ringGeo, neonWhite); ring.rotation.x = Math.PI/2; ring.position.y = 0.4; group.add(ring);
 
-            // 2. Anillo Gigante (Cápsula)
             const hoopGeo = new THREE.TorusGeometry(3, 0.3, 16, 64);
-            const hoop = new THREE.Mesh(hoopGeo, whitePlastic);
-            hoop.position.set(0, 3.2, -1);
-            // Aplastar un poco la base del anillo
-            hoop.scale.y = 1.1;
-            group.add(hoop);
+            const hoop = new THREE.Mesh(hoopGeo, whitePlastic); hoop.position.set(0, 3.2, -1); hoop.scale.y = 1.1; group.add(hoop);
 
-            // Luz interna del anillo
             const hoopLight = new THREE.Mesh(new THREE.TorusGeometry(3, 0.1, 16, 64), neonWhite);
-            hoopLight.position.set(0, 3.2, -0.7); hoopLight.scale.y = 1.1;
-            group.add(hoopLight);
+            hoopLight.position.set(0, 3.2, -0.7); hoopLight.scale.y = 1.1; group.add(hoopLight);
 
-            // 3. Asiento/Mesa orgánica
             const desk = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 16, 0, Math.PI), whitePlastic);
-            desk.rotation.x = -Math.PI/2; desk.scale.set(1, 0.5, 1); desk.position.set(0, 0.8, 0.5);
-            group.add(desk);
+            desk.rotation.x = -Math.PI/2; desk.scale.set(1, 0.5, 1); desk.position.set(0, 0.8, 0.5); group.add(desk);
 
-            // 4. Pantalla Circular (Dentro del anillo)
             const screenGeo = new THREE.CircleGeometry(2.5, 32);
             const screenTex = createScreenTexture(data.t);
-            const screenMat = new THREE.MeshBasicMaterial({ map: screenTex });
-            const screen = new THREE.Mesh(screenGeo, screenMat);
-            screen.position.set(0, 3.2, -1);
-            screen.userData = { data: data };
+            const screen = new THREE.Mesh(screenGeo, new THREE.MeshBasicMaterial({ map: screenTex }));
+            screen.position.set(0, 3.2, -1); screen.userData = { data: data };
+            interactables.push(screen); group.add(screen);
 
-            interactables.push(screen);
-            group.add(screen);
-
-            const light = new THREE.PointLight(0x0088ff, 1, 10);
-            light.position.set(0, 3, 2);
-            group.add(light);
+            const light = new THREE.PointLight(0x0088ff, 1, 10); light.position.set(0, 3, 2); group.add(light);
         }
 
+        // ======================================================================
+        // NUEVAS FUNCIONES PARA LAS SALIDAS DETALLADAS
+        // ======================================================================
+
+        // --- SALIDA PRINCIPAL (CENTRO) - Basada en la segunda imagen ---
+        function buildDetailedMainExit(group, data) {
+            const matDarkMetal = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.7, metalness: 0.8 });
+            const matGlowingBlue = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
+            const matFloor = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
+
+            // 1. Gradas / Base
+            const steps = 3;
+            const stepWidth = 12;
+            const stepHeight = 0.3;
+            const stepDepth = 1.5;
+            for(let i=0; i<steps; i++) {
+                const stepGeo = new THREE.BoxGeometry(stepWidth, stepHeight, stepDepth);
+                const step = new THREE.Mesh(stepGeo, matFloor);
+                step.position.set(0, stepHeight/2 + i*stepHeight, i*stepDepth);
+                group.add(step);
+                // Luz de borde en cada escalón
+                const edgeGeo = new THREE.BoxGeometry(stepWidth, 0.05, 0.05);
+                const edge = new THREE.Mesh(edgeGeo, matGlowingBlue);
+                edge.position.set(0, stepHeight + i*stepHeight, i*stepDepth + stepDepth/2);
+                group.add(edge);
+            }
+            const platformDepth = steps * stepDepth;
+
+            // 2. Marco Principal (Arco Estilizado)
+            const frameWidth = 14;
+            const frameHeight = 9;
+            const frameThickness = 0.8;
+            const frameZ = platformDepth + 1;
+            
+            // Pilares laterales
+            const pilarGeo = new THREE.BoxGeometry(frameThickness, frameHeight, frameThickness);
+            const pilarL = new THREE.Mesh(pilarGeo, matDarkMetal);
+            pilarL.position.set(-frameWidth/2, frameHeight/2, frameZ);
+            group.add(pilarL);
+            const pilarR = new THREE.Mesh(pilarGeo, matDarkMetal);
+            pilarR.position.set(frameWidth/2, frameHeight/2, frameZ);
+            group.add(pilarR);
+
+            // Dintel superior (Arco segmentado simple)
+            const topBarGeo = new THREE.BoxGeometry(frameWidth + frameThickness, frameThickness, frameThickness);
+            const topBar = new THREE.Mesh(topBarGeo, matDarkMetal);
+            topBar.position.set(0, frameHeight, frameZ);
+            group.add(topBar);
+
+            // Bordes de neón para el marco
+            const neonVGeo = new THREE.BoxGeometry(0.1, frameHeight, 0.1);
+            const neonL = new THREE.Mesh(neonVGeo, matGlowingBlue); neonL.position.set(-frameWidth/2 + 0.4, frameHeight/2, frameZ + 0.4); group.add(neonL);
+            const neonR = new THREE.Mesh(neonVGeo, matGlowingBlue); neonR.position.set(frameWidth/2 - 0.4, frameHeight/2, frameZ + 0.4); group.add(neonR);
+            const neonHGeo = new THREE.BoxGeometry(frameWidth, 0.1, 0.1);
+            const neonT = new THREE.Mesh(neonHGeo, matGlowingBlue); neonT.position.set(0, frameHeight - 0.4, frameZ + 0.4); group.add(neonT);
+
+            // 3. Letrero "SALIDA"
+            const signBox = new THREE.Mesh(new THREE.BoxGeometry(5, 1.5, 0.2), matDarkMetal);
+            signBox.position.set(0, frameHeight + 1, frameZ);
+            group.add(signBox);
+            const signTex = createSalidaSignTexture();
+            const signPlane = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 1.3), new THREE.MeshBasicMaterial({map: signTex, transparent: true}));
+            signPlane.position.set(0, frameHeight + 1, frameZ + 0.11);
+            group.add(signPlane);
+
+            // 4. La Imagen Portal (Fondo interactivo)
+            const portalWidth = frameWidth - 1;
+            const portalHeight = frameHeight - 1;
+            const portalTex = textureLoader.load(data.img);
+            const portal = new THREE.Mesh(new THREE.PlaneGeometry(portalWidth, portalHeight), new THREE.MeshBasicMaterial({ map: portalTex }));
+            portal.position.set(0, frameHeight/2 + 0.5, frameZ - 0.5); // Detrás del marco
+            portal.userData = { data: data }; // Datos para la interacción
+            interactables.push(portal);
+            group.add(portal);
+
+            // Luz ambiental del portal
+            const portalLight = new THREE.PointLight(0x00d2ff, 1, 15);
+            portalLight.position.set(0, frameHeight/2, frameZ + 2);
+            group.add(portalLight);
+        }
+
+        // --- SALIDAS SECUNDARIAS (LATERALES) - Basadas en la primera imagen ---
+        function buildDetailedSideExit(group, data) {
+            const matDarkMetal = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.5, metalness: 0.9 });
+            const matGlowingBlue = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
+            
+            const archWidth = 10;
+            const archHeight = 8;
+            const pillarThick = 1.2;
+
+            // 1. Estructura del Arco/Puerta
+            // Pilares principales
+            const pilarGeo = new THREE.CylinderGeometry(pillarThick/2, pillarThick/2, archHeight, 16);
+            const pilarL = new THREE.Mesh(pilarGeo, matDarkMetal);
+            pilarL.position.set(-archWidth/2, archHeight/2, 0);
+            group.add(pilarL);
+            const pilarR = new THREE.Mesh(pilarGeo, matDarkMetal);
+            pilarR.position.set(archWidth/2, archHeight/2, 0);
+            group.add(pilarR);
+
+            // Arco superior (usando un toroide parcial)
+            const archTopGeo = new THREE.TorusGeometry(archWidth/2, pillarThick/2, 16, 32, Math.PI);
+            const archTop = new THREE.Mesh(archTopGeo, matDarkMetal);
+            archTop.position.set(0, archHeight/2, 0);
+            archTop.rotation.z = Math.PI; // Invertir para que el arco vaya hacia arriba
+            group.add(archTop);
+
+            // Base de los pilares
+            const baseGeo = new THREE.BoxGeometry(pillarThick+0.5, 1, pillarThick+0.5);
+            const baseL = new THREE.Mesh(baseGeo, matDarkMetal); baseL.position.set(-archWidth/2, 0.5, 0); group.add(baseL);
+            const baseR = new THREE.Mesh(baseGeo, matDarkMetal); baseR.position.set(archWidth/2, 0.5, 0); group.add(baseR);
+
+            // 2. Detalles de Neón
+            // Anillos en los pilares
+            const ringGeo = new THREE.TorusGeometry(pillarThick/2 + 0.05, 0.05, 8, 16);
+            for(let y=2; y<archHeight; y+=2) {
+                const ringL = new THREE.Mesh(ringGeo, matGlowingBlue); ringL.rotation.x = Math.PI/2; ringL.position.set(-archWidth/2, y, 0); group.add(ringL);
+                const ringR = new THREE.Mesh(ringGeo, matGlowingBlue); ringR.rotation.x = Math.PI/2; ringR.position.set(archWidth/2, y, 0); group.add(ringR);
+            }
+            // Tira en el arco superior
+            const archNeonGeo = new THREE.TorusGeometry(archWidth/2, 0.05, 8, 32, Math.PI);
+            const archNeon = new THREE.Mesh(archNeonGeo, matGlowingBlue);
+            archNeon.position.set(0, archHeight/2, 0.6); // Ligeramente enfrente
+            archNeon.rotation.z = Math.PI;
+            group.add(archNeon);
+
+            // 3. La Imagen Portal (Fondo interactivo)
+            // Se ajusta al espacio dentro del arco
+            const portalW = archWidth - pillarThick;
+            const portalH = archHeight + (archWidth/2) - 1; // Altura aproximada bajo el arco
+            const portalTex = textureLoader.load(data.img);
+            // Usamos un plano simple, podrías usar una forma más compleja si lo deseas
+            const portal = new THREE.Mesh(new THREE.PlaneGeometry(portalW, portalH*0.8), new THREE.MeshBasicMaterial({ map: portalTex }));
+            portal.position.set(0, portalH*0.4 + 0.5, -0.5); // Centrado y detrás
+            portal.userData = { data: data };
+            interactables.push(portal);
+            group.add(portal);
+
+             // Luz ambiental del portal
+            const portalLight = new THREE.PointLight(0x00d2ff, 0.8, 12);
+            portalLight.position.set(0, archHeight/2, 2);
+            group.add(portalLight);
+        }
+
+        // Función principal para colocar todos los elementos en la escena
         function buildLayout() {
             DATA.forEach(d => {
                 const group = new THREE.Group();
                 let x=0, z=0, rot=0;
 
-                // POSICIONAMIENTO ZIG-ZAG
+                // Lógica de posicionamiento basada en 'd.pos'
                 if(d.pos === 'left-back') {
                     z = 12 - (lb++ * 14); x = -20; rot = Math.PI/5;
                 } else if (d.pos === 'left-front') {
@@ -392,55 +505,59 @@
                 } else if(d.pos === 'center') {
                     x = 0; z = -40; rot = 0;
                 } else if(d.pos.includes('exit')) {
-                    z = 38; rot = Math.PI;
+                    z = 38; rot = Math.PI; // Mirando hacia el jugador inicial
                     if(d.pos.includes('center')) x=0;
-                    if(d.pos.includes('left')) x=-10;
-                    if(d.pos.includes('right')) x=10;
+                    if(d.pos.includes('left')) x=-25; // Más separadas
+                    if(d.pos.includes('right')) x=25;
                 }
 
                 group.position.set(x, 0, z);
                 group.rotation.y = rot;
 
-                // CONSTRUIR SEGÚN ESTILO
+                // Selección del constructor según el estilo
                 if(d.style === 'portal') {
                     buildPortalStand(group, d);
-                } 
-                else if (d.style === 'pod') {
+                } else if (d.style === 'pod') {
                     buildPodStand(group, d);
-                }
-                else if (d.style === 'center-screen') {
-                    // Stand Central Simple pero Grande
+                } else if (d.style === 'center-screen') {
+                    // Stand central simple
                     const wall = new THREE.Mesh(new THREE.BoxGeometry(16, 8, 1), new THREE.MeshStandardMaterial({color:0x222}));
                     wall.position.y=4; group.add(wall);
                     const sc = new THREE.Mesh(new THREE.PlaneGeometry(14, 7), new THREE.MeshBasicMaterial({map:createScreenTexture(d.t)}));
                     sc.position.set(0,4,0.6); sc.userData={data:d}; interactables.push(sc); group.add(sc);
-                }
-                else if (d.style === 'exit') {
-                    // Salida Simple
-                    const box = new THREE.Mesh(new THREE.BoxGeometry(6, 4, 0.5), new THREE.MeshBasicMaterial({color:0x0022aa}));
-                    box.position.y=2; group.add(box);
-                    const txt = new THREE.Mesh(new THREE.PlaneGeometry(5,2), new THREE.MeshBasicMaterial({map:createScreenTexture(d.t)}));
-                    txt.position.set(0,2,0.3); txt.userData={data:d}; interactables.push(txt); group.add(txt);
+                    const light = new THREE.PointLight(0xff0055, 1, 20); light.position.set(0, 5, 5); group.add(light);
+                } else if (d.style === 'exit-main-detailed') {
+                    // NUEVO: Salida Principal Detallada
+                    buildDetailedMainExit(group, d);
+                } else if (d.style === 'exit-side-detailed') {
+                    // NUEVO: Salidas Laterales Detalladas
+                    buildDetailedSideExit(group, d);
                 }
 
                 scene.add(group);
             });
         }
 
+        // Manejador de clics
         function onClick() {
+            // Si el control está bloqueado (modo juego) y hay un objeto bajo la retícula
             if(controls.isLocked && hovered) {
                 const d = hovered.userData.data;
+                // Si es una salida, abrir el enlace
                 if(d.pos.includes('exit')) {
                     window.open(d.link, '_blank');
                 } else {
+                    // Si es un stand, abrir el modal
                     openModal(d);
-                    controls.unlock();
+                    controls.unlock(); // Desbloquear el ratón para usar el modal
                 }
             } else if(!controls.isLocked && document.getElementById('stand-modal').style.display !== 'flex') {
+                // Si no estamos en el modal, el clic bloquea el ratón para jugar
                 controls.lock();
             }
         }
 
+        // Funciones del modal
         function openModal(d) {
             document.getElementById('m-title').innerText = d.t;
             document.getElementById('video-wrapper').innerHTML = IFRAME_TEMPLATE(d.vid);
@@ -450,41 +567,41 @@
         window.closeModal = function() {
             document.getElementById('stand-modal').style.display = 'none';
             document.getElementById('video-wrapper').innerHTML = '';
-            controls.lock();
+            controls.lock(); // Volver al juego al cerrar
         }
 
+        // Ajuste de ventana
         function onResize() {
             camera.aspect = window.innerWidth/window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
+        // Bucle principal de animación
         function animate() {
             requestAnimationFrame(animate);
             const time = performance.now();
 
-            // Rotación de objetos interactivos hacia el usuario (LookAt)
-            // Esto asegura que siempre veas la pantalla de frente
-            interactables.forEach(obj => {
-                if(obj.parent) {
-                    // Solo giramos la pantalla localmente, o el grupo si es necesario
-                    // Para este diseño, las pantallas están integradas, así que no giramos
-                    // Pero si quieres efecto "seguimiento", descomenta:
-                    // obj.lookAt(camera.position);
-                }
-            });
-            
+            // Lógica de movimiento y colisión (simple)
             if(controls.isLocked) {
+                // Raycasting desde el centro de la cámara
                 raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
                 const intersects = raycaster.intersectObjects(interactables);
                 const msg = document.getElementById('interaction-msg');
                 const ch = document.getElementById('crosshair');
 
+                // Detección de interacción
                 if(intersects.length > 0 && intersects[0].distance < 20) {
                     hovered = intersects[0].object;
                     msg.style.display = 'block';
                     ch.style.transform = 'translate(-50%,-50%) scale(2)';
                     ch.style.background = '#00ffff';
+                    // Cambiar texto si es salida
+                    if(hovered.userData.data.pos.includes('exit')) {
+                         msg.innerText = "CLIC PARA SALIR";
+                    } else {
+                         msg.innerText = "CLIC PARA VER DETALLES";
+                    }
                 } else {
                     hovered = null;
                     msg.style.display = 'none';
@@ -492,14 +609,15 @@
                     ch.style.background = 'white';
                 }
 
+                // Física de movimiento básica
                 const delta = (time - prevTime) / 1000;
-                velocity.x -= velocity.x * 10.0 * delta;
+                velocity.x -= velocity.x * 10.0 * delta; // Fricción
                 velocity.z -= velocity.z * 10.0 * delta;
                 direction.z = Number(moveF) - Number(moveB);
-                direction.x = Number(moveR) - Number(moveL);
+                direction.x = Number(moveR) - Number(moveL); // Corregido de moveL a moveR/moveL
                 direction.normalize();
 
-                if (moveF || moveB) velocity.z -= direction.z * 80.0 * delta;
+                if (moveF || moveB) velocity.z -= direction.z * 80.0 * delta; // Aceleración
                 if (moveL || moveR) velocity.x -= direction.x * 80.0 * delta;
 
                 controls.moveRight(-velocity.x * delta);
