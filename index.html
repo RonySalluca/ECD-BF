@@ -21,88 +21,132 @@
             font-family: 'Rajdhani', sans-serif;
         }
 
-        /* Pantalla de bloqueo e instrucciones iniciales */
+        /* Pantalla de bloqueo (Landing Screen) */
         #blocker {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            /* AQUI SE CARGA TU PORTADA DESDE LA CARPETA IMG */
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), url('img/portada.jpg');
+
+            /* IMAGEN DE FONDO (PORTADA) - Ajustado a "Casi Negro" */
+            background: linear-gradient(rgba(5, 5, 10, 0.85), rgba(0, 0, 0, 0.98)), url('img/portada.jpg');
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
+
             z-index: 99;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #00d2ff;
+            color: #fff;
             transition: opacity 0.5s;
         }
 
-        h1 {
-            font-family: 'Teko', sans-serif;
-            font-size: 6vw;
-            margin: 0;
-            color: #fff;
-            text-shadow: 0 0 30px #00d2ff;
-            text-transform: uppercase;
-            letter-spacing: 5px;
+        /* LOGOS SUPERIORES (NUEVO) */
+        .corner-logo {
+            position: absolute;
+            top: 40px;
+            /* Separación del techo */
+            width: 18vw;
+            /* Ancho relativo a la pantalla para que crezca */
+            max-width: 280px;
+            /* Límite máximo para pantallas muy grandes */
+            min-width: 140px;
+            /* Límite mínimo para celulares */
+            height: auto;
+            /* Mantiene la proporción (largo hacia el lado) */
+            z-index: 101;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+            /* Sombra para resaltar sobre fondo */
+            transition: transform 0.3s ease;
         }
 
-        h2 {
-            font-family: 'Teko', sans-serif;
-            font-size: 3vw;
-            margin: 10px 0 30px 0;
-            color: #ff0055;
-            text-shadow: 0 0 20px #ff0055;
-            text-transform: uppercase;
-            letter-spacing: 3px;
+        .corner-logo:hover {
+            transform: scale(1.05);
+            /* Efecto sutil al pasar el mouse */
+        }
+
+        #logo-left {
+            left: 40px;
+        }
+
+        #logo-right {
+            right: 40px;
+        }
+
+        /* LOGO PRINCIPAL */
+        #main-logo {
+            width: 85vw;
+            max-width: 1200px;
+            height: auto;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 0 30px rgba(255, 68, 0, 0.6));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
         }
 
         .instructions {
-            border: 1px solid #00d2ff;
-            padding: 30px;
-            background: rgba(0, 10, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.85);
             margin-top: 20px;
-            border-radius: 15px;
+            border-radius: 50px;
             text-align: center;
-            color: white;
-            box-shadow: 0 0 50px rgba(0, 210, 255, 0.1);
-            backdrop-filter: blur(5px);
+            color: #ccc;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            font-size: 1rem;
+            letter-spacing: 1px;
         }
 
         .key {
-            border: 1px solid #fff;
-            padding: 4px 10px;
+            border: 1px solid #ff4400;
+            padding: 2px 8px;
             border-radius: 4px;
             font-weight: bold;
-            color: #00d2ff;
+            color: #ff4400;
         }
 
         #start-btn {
-            margin-top: 40px;
-            padding: 15px 60px;
-            font-size: 2rem;
+            margin-top: 50px;
+            padding: 20px 70px;
+            font-size: 3rem;
             font-family: 'Teko', sans-serif;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid #00d2ff;
-            color: #00d2ff;
+            background: #ff4400;
+            border: none;
+            color: #000;
             cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 4px;
+            box-shadow: 0 0 40px rgba(255, 68, 0, 0.4);
+            border-radius: 5px;
         }
 
         #start-btn:hover {
-            background: #00d2ff;
-            color: #000;
-            box-shadow: 0 0 50px #00d2ff;
+            background: #fff;
+            color: #ff4400;
+            box-shadow: 0 0 60px rgba(255, 68, 0, 0.8);
+            transform: scale(1.1) rotate(-1deg);
         }
 
-        /* Retícula central y mensajes de interacción */
+        /* Retícula central */
         #crosshair {
             position: absolute;
             top: 50%;
@@ -133,7 +177,7 @@
             letter-spacing: 2px;
         }
 
-        /* Modal para mostrar el contenido de los stands */
+        /* Modal de contenido */
         #stand-modal {
             display: none;
             position: fixed;
@@ -261,17 +305,20 @@
 
 <body>
 
-    <!-- Interfaz de Usuario 2D -->
+    <!-- Interfaz de Usuario 2D (Landing Screen) -->
     <div id="blocker">
-        <h1>EXPO BLACK FRIDAY</h1>
-        <h2>OFERTAS EXCLUSIVAS</h2>
+        <!-- NUEVOS LOGOS SUPERIORES -->
+        <img id="logo-left" class="corner-logo" src="img/Logo01.png" alt="Logo Izquierda">
+        <img id="logo-right" class="corner-logo" src="img/Logo02.png" alt="Logo Derecha">
+
+        <!-- LOGO PRINCIPAL CENTRO -->
+        <img id="main-logo" src="img/texto_black.png" alt="LLEGÓ EL BLACK FRIDAY">
+
         <div class="instructions">
             <p><span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span
-                    class="key">D</span> MOVERSE</p>
-            <p>MOUSE - MIRAR</p>
-            <p>CLIC - INTERACTUAR</p>
+                    class="key">D</span> MOVERSE &nbsp;|&nbsp; MOUSE - MIRAR &nbsp;|&nbsp; CLIC - ABRIR</p>
         </div>
-        <button id="start-btn">INGRESAR AL RECINTO</button>
+        <button id="start-btn">¿ESTÁS LISTO?</button>
     </div>
 
     <div id="crosshair"></div>
@@ -292,14 +339,8 @@
     </div>
 
     <script>
-        // ======================================================================
-        // CONFIGURACIÓN Y DATOS DEL EVENTO
-        // ======================================================================
-
-        // Plantilla para embeber videos de YouTube
         const IFRAME_TEMPLATE = (url) => `<iframe width="100%" height="100%" src="${url}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 
-        // URLs de videos de ejemplo
         const V1 = "https://www.youtube-nocookie.com/embed/mZ_uPr7rHT4?si=s-docLxR3NVd3Q5T";
         const V2 = "https://www.youtube-nocookie.com/embed/NbFwmRgeRaE?si=TNLoQdf-OTvXNuOY";
         const V3 = "https://www.youtube-nocookie.com/embed/827OMBNYRKI?si=mCi4CvUeRVnzuqx9";
@@ -332,7 +373,6 @@
             { t: "CONTACTO", pos: "exit-right", link: "https://tusitio.com/contacto", style: 'exit-side-detailed', img: 'img/salida_der.jpg' }
         ];
 
-        // Implementación de PointerLockControls
         THREE.PointerLockControls = function (t, e) { if (void 0 === e && (e = document.body), this.domElement = e, this.isLocked = !1, this.minPolarAngle = 0, this.maxPolarAngle = Math.PI, this.pointerSpeed = 1.0, !(t instanceof THREE.Camera)) throw new Error("THREE.PointerLockControls: First parameter must be a camera."); var n = this, o = { type: "change" }, r = { type: "lock" }, i = { type: "unlock" }, c = new THREE.Euler(0, 0, 0, "YXZ"), s = Math.PI / 2, a = new THREE.Vector3; function l(e) { if (!1 !== n.isLocked) { var r = e.movementX || e.mozMovementX || e.webkitMovementX || 0, i = e.movementY || e.mozMovementY || e.webkitMovementY || 0; c.setFromQuaternion(t.quaternion), c.y -= r * .002 * n.pointerSpeed, c.x -= i * .002 * n.pointerSpeed, c.x = Math.max(s - n.maxPolarAngle, Math.min(s - n.minPolarAngle, c.x)), t.quaternion.setFromEuler(c), n.dispatchEvent(o) } } function u() { n.domElement.ownerDocument.pointerLockElement === n.domElement ? (n.dispatchEvent(r), n.isLocked = !0) : (n.dispatchEvent(i), n.isLocked = !1) } this.connect = function () { n.domElement.ownerDocument.addEventListener("mousemove", l, !1), n.domElement.ownerDocument.addEventListener("pointerlockchange", u, !1) }, this.disconnect = function () { n.domElement.ownerDocument.removeEventListener("mousemove", l, !1), n.domElement.ownerDocument.removeEventListener("pointerlockchange", u, !1) }, this.dispose = function () { this.disconnect() }, this.getObject = function () { return t }, this.getDirection = function () { var e = new THREE.Vector3(0, 0, -1); return function (n) { return n.copy(e).applyQuaternion(t.quaternion) } }(), this.moveForward = function (e) { a.setFromMatrixColumn(t.matrix, 0), a.crossVectors(t.up, a), t.position.addScaledVector(a, e) }, this.moveRight = function (e) { a.setFromMatrixColumn(t.matrix, 0), t.position.addScaledVector(a, e) }, this.lock = function () { this.domElement.requestPointerLock() }, this.unlock = function () { n.domElement.ownerDocument.exitPointerLock() }, this.connect() }; THREE.PointerLockControls.prototype = Object.create(THREE.EventDispatcher.prototype), THREE.PointerLockControls.prototype.constructor = THREE.PointerLockControls;
 
         let camera, scene, renderer, controls, raycaster;
@@ -369,15 +409,30 @@
             document.body.appendChild(renderer.domElement);
 
             controls = new THREE.PointerLockControls(camera, document.body);
-            document.getElementById('start-btn').addEventListener('click', () => controls.lock());
+
+            // --- CORRECCIÓN CLIC ---
+            // Solo el botón inicia el juego
+            document.getElementById('start-btn').addEventListener('click', () => {
+                controls.lock();
+            });
+
             controls.addEventListener('lock', () => document.getElementById('blocker').style.opacity = 0);
+
+            // Al desbloquear (ESC), vuelve a mostrar el blocker para pausar
             controls.addEventListener('unlock', () => {
-                if (document.getElementById('stand-modal').style.display !== 'flex') document.getElementById('blocker').style.opacity = 1;
+                if (document.getElementById('stand-modal').style.display !== 'flex') {
+                    document.getElementById('blocker').style.opacity = 1;
+                    // Cambiamos el texto para indicar que es reanudar
+                    document.getElementById('start-btn').innerText = "REANUDAR";
+                }
             });
 
             document.addEventListener('keydown', (e) => onKey(e, true));
             document.addEventListener('keyup', (e) => onKey(e, false));
+
+            // Evento click solo para interactuar con objetos, no para bloquear controles si ya están desbloqueados
             document.addEventListener('click', onClick);
+
             window.addEventListener('resize', onResize);
 
             raycaster = new THREE.Raycaster();
@@ -420,7 +475,6 @@
         }
 
         function createScreenTexture(text) {
-            // Fallback en caso de que la imagen falle
             const cvs = document.createElement('canvas'); cvs.width = 512; cvs.height = 256;
             const ctx = cvs.getContext('2d');
             ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 512, 256);
@@ -470,7 +524,6 @@
 
             const screenGeo = new THREE.PlaneGeometry(2.8, 1.6);
 
-            // CARGA DE IMAGEN LOCAL
             let screenTex;
             if (data.img) {
                 screenTex = textureLoader.load(data.img);
@@ -507,7 +560,6 @@
 
             const screenGeo = new THREE.CircleGeometry(2.5, 32);
 
-            // CARGA DE IMAGEN LOCAL
             let screenTex;
             if (data.img) {
                 screenTex = textureLoader.load(data.img);
@@ -558,7 +610,6 @@
 
             const portalWidth = frameWidth - 1; const portalHeight = frameHeight - 1;
 
-            // CARGA DE IMAGEN LOCAL SALIDA
             const portalTex = textureLoader.load(data.img);
 
             const portal = new THREE.Mesh(new THREE.PlaneGeometry(portalWidth, portalHeight), new THREE.MeshBasicMaterial({ map: portalTex }));
@@ -600,7 +651,6 @@
 
             const portalW = archWidth - pillarThick; const portalH = archHeight + (archWidth / 2) - 1;
 
-            // CARGA DE IMAGEN LOCAL SALIDA
             const portalTex = textureLoader.load(data.img);
 
             const portal = new THREE.Mesh(new THREE.PlaneGeometry(portalW, portalH * 0.8), new THREE.MeshBasicMaterial({ map: portalTex }));
@@ -642,7 +692,6 @@
                     const wall = new THREE.Mesh(new THREE.BoxGeometry(16, 8, 1), new THREE.MeshStandardMaterial({ color: 0x222 }));
                     wall.position.y = 4; group.add(wall);
 
-                    // CARGA IMAGEN CENTRAL
                     let scTex;
                     if (d.img) scTex = textureLoader.load(d.img);
                     else scTex = createScreenTexture(d.t);
@@ -661,6 +710,9 @@
         }
 
         function onClick() {
+            // --- CORRECCIÓN CLIC ---
+            // Eliminamos la parte que hacía controls.lock() si no se hacía clic en un objeto.
+            // Ahora onClick solo gestiona la interacción con objetos.
             if (controls.isLocked && hovered) {
                 const d = hovered.userData.data;
                 if (d.pos.includes('exit')) {
@@ -669,9 +721,8 @@
                     openModal(d);
                     controls.unlock();
                 }
-            } else if (!controls.isLocked && document.getElementById('stand-modal').style.display !== 'flex') {
-                controls.lock();
             }
+            // Eliminado el 'else if' que causaba el bloqueo al hacer clic en cualquier lado
         }
 
         function openModal(d) {
