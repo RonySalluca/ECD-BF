@@ -37,35 +37,93 @@
             text-shadow: 0 0 10px rgba(0,0,0,0.8); font-family: 'Teko'; letter-spacing: 2px;
         }
 
+        /* --- MODAL MEJORADO --- */
         #stand-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center;
             backdrop-filter: blur(8px);
         }
+        
         .modal-card {
-            width: 85%; max-width: 1200px; height: 70vh; background: #111; 
-            border: 2px solid #ff4400; display: flex; box-shadow: 0 0 50px rgba(255, 68, 0, 0.2);
-            border-radius: 8px; overflow: hidden;
+            width: 85%; max-width: 1200px; height: 70vh; 
+            background: #000; 
+            border: none; 
+            display: flex; 
+            box-shadow: 0 0 80px rgba(255, 68, 0, 0.3);
+            position: relative; 
+            overflow: hidden; 
         }
-        .vid-container { flex: 2; background: #000; position: relative; display:flex; align-items:center; justify-content:center; }
+
+        /* CINTAS ANIMADAS (MARQUEE) - FLUJO CORREGIDO */
+        .marquee {
+            position: absolute;
+            background: #ff4400;
+            color: #000;
+            font-family: 'Teko', sans-serif;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            z-index: 10;
+            user-select: none;
+        }
+        
+        .marquee span {
+            white-space: nowrap;
+            padding: 0 20px;
+        }
+
+        /* Top: Derecha a Izquierda (<-) */
+        .marquee.top { top: 0; left: 0; width: 100%; height: 30px; }
+        .marquee.top span { animation: scrollLeft 10s linear infinite; }
+
+        /* Bottom: Izquierda a Derecha (->) */
+        .marquee.bottom { bottom: 0; left: 0; width: 100%; height: 30px; }
+        .marquee.bottom span { animation: scrollRight 10s linear infinite; }
+
+        /* Left: Arriba a Abajo (Bajando) */
+        .marquee.left { top: 0; left: 0; width: 30px; height: 100%; flex-direction: column; justify-content: center;}
+        .marquee.left span { writing-mode: vertical-rl; transform: rotate(180deg); animation: scrollDown 10s linear infinite; padding: 20px 0; }
+
+        /* Right: Abajo a Arriba (Subiendo) */
+        .marquee.right { top: 0; right: 0; width: 30px; height: 100%; flex-direction: column; justify-content: center;}
+        .marquee.right span { writing-mode: vertical-rl; transform: rotate(180deg); animation: scrollUp 10s linear infinite; padding: 20px 0; }
+
+        @keyframes scrollLeft { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+        @keyframes scrollRight { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        
+        /* Ajustados para flujo continuo */
+        @keyframes scrollDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+        @keyframes scrollUp { from { transform: translateY(0); } to { transform: translateY(-100%); } }
+
+        .vid-container { 
+            flex: 2; background: #000; position: relative; display:flex; align-items:center; justify-content:center; 
+            margin: 30px 0 30px 30px; 
+        }
         .vid-container iframe { width: 100%; height: 100%; border: none; }
         
         .info-container { 
             flex: 1; padding: 40px; color: #ccc; position: relative; display: flex; 
             flex-direction: column; justify-content: center; border-left: 1px solid #333; 
-            background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
+            background: linear-gradient(135deg, #111 0%, #050505 100%);
+            margin: 30px 30px 30px 0; 
         }
-        .info-container h2 { color: #fff; font-family: 'Teko'; font-size: 3.5rem; margin: 0 0 15px 0; line-height: 0.9; text-transform: uppercase; color: #ff4400;}
-        .info-container p { font-size: 1.1rem; line-height: 1.5; color: #bbb; margin-bottom: 30px; }
-        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 2.5rem; color: #666; background: none; border: none; cursor: pointer; transition: 0.3s; }
+        
+        .info-container h2 { color: #fff; font-family: 'Teko'; font-size: 4rem; margin: 0 0 30px 0; line-height: 0.9; text-transform: uppercase; color: #ff4400;}
+        
+        .close-btn { position: absolute; top: 0px; right: 10px; font-size: 3rem; color: #666; background: none; border: none; cursor: pointer; transition: 0.3s; z-index: 20; }
         .close-btn:hover { color: #fff; }
+        
         .btn-link { 
-            display: block; padding: 15px; text-align: center; font-weight: bold; text-decoration: none; 
-            margin-top: 10px; font-family: 'Teko'; font-size: 1.4rem; transition: 0.3s; letter-spacing: 1px;
+            display: block; padding: 20px; text-align: center; font-weight: bold; text-decoration: none; 
+            margin-top: 20px; font-family: 'Teko'; font-size: 1.8rem; transition: 0.3s; letter-spacing: 1px;
             border-radius: 4px; text-transform: uppercase;
         }
         .btn-buy { background: #ff4400; color: #000; border: none; }
-        .btn-buy:hover { background: #fff; box-shadow: 0 0 20px rgba(255, 68, 0, 0.6); }
+        .btn-buy:hover { background: #fff; box-shadow: 0 0 30px rgba(255, 68, 0, 0.8); }
         .btn-doc { border: 1px solid #444; color: #888; background: transparent; }
         .btn-doc:hover { border-color: #fff; color: #fff; }
     </style>
@@ -81,11 +139,28 @@
 
     <div id="stand-modal">
         <div class="modal-card">
+            <!-- CINTAS ANIMADAS -->
+            <div class="marquee top">
+                <span>ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; </span>
+                <span>ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; </span>
+            </div>
+            <div class="marquee bottom">
+                <span>ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; </span>
+                <span>ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; </span>
+            </div>
+            <div class="marquee left">
+                <span>ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; </span>
+                <span>ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; </span>
+            </div>
+            <div class="marquee right">
+                <span>ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; </span>
+                <span>ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; ECD BLACK FRIDAY &nbsp;•&nbsp; </span>
+            </div>
+
             <div class="vid-container" id="video-wrapper"></div>
             <div class="info-container">
                 <button class="close-btn" onclick="closeModal()">×</button>
                 <h2 id="m-title">TITULO</h2>
-                <p>Explora las mejores ofertas y tecnologías en construcción digital. Contenido exclusivo disponible solo por tiempo limitado durante el Black Friday.</p>
                 <a id="m-buy" href="#" class="btn-link btn-buy" target="_blank">ACCEDER A LA OFERTA</a>
                 <a id="m-doc" href="#" class="btn-link btn-doc" target="_blank">DESCARGAR BROCHURE</a>
             </div>
@@ -96,28 +171,31 @@
         const IFRAME_TEMPLATE = (url) => `<iframe width="100%" height="100%" src="${url}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
         const V1 = "https://www.youtube-nocookie.com/embed/mZ_uPr7rHT4?si=s-docLxR3NVd3Q5T";
         
+        // DATOS ACTUALIZADOS CON LINKS (Ejemplos)
+        // offer: Link para el botón "ACCEDER A LA OFERTA"
+        // pdf: Link para el botón "DESCARGAR BROCHURE"
         const DATA = [
             // IZQUIERDA
-            { t: "OFERTA BIM", pos: "left-back", type: 1, img: 'img/stand1.jpg', vid: V1 },
-            { t: "SEGURIDAD BF", pos: "left-back", type: 2, img: 'img/stand2.jpg', vid: V1 },
-            { t: "PACK RESIDENCIA", pos: "left-back", type: 3, img: 'img/stand3.jpg', vid: V1 },
-            { t: "KIT TOPOGRAFÍA", pos: "left-front", type: 4, img: 'img/stand4.jpg', vid: V1 }, // TIPO 4 (Holograma)
-            { t: "MAQUINARIA PRO", pos: "left-front", type: 5, img: 'img/stand5.jpg', vid: V1 },
+            { t: "OFERTA BIM", pos: "left-back", type: 1, img: 'img/stand1.jpg', vid: V1, offer: "https://tusitio.com/bim-oferta", pdf: "https://tusitio.com/bim.pdf" },
+            { t: "SEGURIDAD BF", pos: "left-back", type: 2, img: 'img/stand2.jpg', vid: V1, offer: "https://tusitio.com/seguridad-oferta", pdf: "https://tusitio.com/seguridad.pdf" },
+            { t: "PACK RESIDENCIA", pos: "left-back", type: 3, img: 'img/stand3.jpg', vid: V1, offer: "#", pdf: "#" },
+            { t: "KIT TOPOGRAFÍA", pos: "left-front", type: 4, img: 'img/stand4.jpg', vid: V1, offer: "#", pdf: "#" }, 
+            { t: "MAQUINARIA PRO", pos: "left-front", type: 5, img: 'img/stand5.jpg', vid: V1, offer: "#", pdf: "#" },
 
             // DERECHA
-            { t: "PRECIOS BLACK", pos: "right-back", type: 2, img: 'img/stand6.jpg', vid: V1 }, 
-            { t: "LEAN EXPRESS", pos: "right-back", type: 1, img: 'img/stand7.jpg', vid: V1 }, 
-            { t: "ESTRUCTURAS", pos: "right-back", type: 5, img: 'img/stand8.jpg', vid: V1 }, 
-            { t: "INSTALACIONES", pos: "right-front", type: 3, img: 'img/stand9.jpg', vid: V1 }, 
-            { t: "INTERVENTORÍA", pos: "right-front", type: 4, img: 'img/stand10.jpg', vid: V1 }, // TIPO 4 (Holograma)
+            { t: "PRECIOS BLACK", pos: "right-back", type: 2, img: 'img/stand6.jpg', vid: V1, offer: "#", pdf: "#" }, 
+            { t: "LEAN EXPRESS", pos: "right-back", type: 1, img: 'img/stand7.jpg', vid: V1, offer: "#", pdf: "#" }, 
+            { t: "ESTRUCTURAS", pos: "right-back", type: 5, img: 'img/stand8.jpg', vid: V1, offer: "#", pdf: "#" }, 
+            { t: "INSTALACIONES", pos: "right-front", type: 3, img: 'img/stand9.jpg', vid: V1, offer: "#", pdf: "#" }, 
+            { t: "INTERVENTORÍA", pos: "right-front", type: 4, img: 'img/stand10.jpg', vid: V1, offer: "#", pdf: "#" }, 
 
             // CENTRO
-            { t: "MEGA OFERTA", pos: "center", type: 'main', img: 'img/stand_principal.jpg', vid: V1 },
+            { t: "MEGA OFERTA", pos: "center", type: 'main', img: 'img/stand_principal.jpg', vid: V1, offer: "https://tusitio.com/mega-oferta", pdf: "https://tusitio.com/mega.pdf" },
 
             // SALIDAS
-            { t: "SALIDA", pos: "exit-center", type: 'exit-main', img: 'img/salida_centro.jpg' }, 
-            { t: "WEB", pos: "exit-left", type: 'exit-side', img: 'img/salida_izq.jpg' }, 
-            { t: "CONTACTO", pos: "exit-right", type: 'exit-side', img: 'img/salida_der.jpg' } 
+            { t: "SALIDA", pos: "exit-center", type: 'exit-main', img: 'img/salida_centro.jpg', link: "https://google.com" }, 
+            { t: "WEB", pos: "exit-left", type: 'exit-side', img: 'img/salida_izq.jpg', link: "#" }, 
+            { t: "CONTACTO", pos: "exit-right", type: 'exit-side', img: 'img/salida_der.jpg', link: "#" } 
         ];
 
         THREE.PointerLockControls=function(t,e){if(void 0===e&&(e=document.body),this.domElement=e,this.isLocked=!1,this.minPolarAngle=0,this.maxPolarAngle=Math.PI,this.pointerSpeed=1.0,!(t instanceof THREE.Camera))throw new Error("THREE.PointerLockControls: First parameter must be a camera.");var n=this,o={type:"change"},r={type:"lock"},i={type:"unlock"},c=new THREE.Euler(0,0,0,"YXZ"),s=Math.PI/2,a=new THREE.Vector3;function l(e){if(!1!==n.isLocked){var r=e.movementX||e.mozMovementX||e.webkitMovementX||0,i=e.movementY||e.mozMovementY||e.webkitMovementY||0;c.setFromQuaternion(t.quaternion),c.y-=r*.002*n.pointerSpeed,c.x-=i*.002*n.pointerSpeed,c.x=Math.max(s-n.maxPolarAngle,Math.min(s-n.minPolarAngle,c.x)),t.quaternion.setFromEuler(c),n.dispatchEvent(o)}}function u(){n.domElement.ownerDocument.pointerLockElement===n.domElement?(n.dispatchEvent(r),n.isLocked=!0):(n.dispatchEvent(i),n.isLocked=!1)}this.connect=function(){n.domElement.ownerDocument.addEventListener("mousemove",l,!1),n.domElement.ownerDocument.addEventListener("pointerlockchange",u,!1)},this.disconnect=function(){n.domElement.ownerDocument.removeEventListener("mousemove",l,!1),n.domElement.ownerDocument.removeEventListener("pointerlockchange",u,!1)},this.dispose=function(){this.disconnect()},this.getObject=function(){return t},this.getDirection=function(){var e=new THREE.Vector3(0,0,-1);return function(n){return n.copy(e).applyQuaternion(t.quaternion)}}(),this.moveForward=function(e){a.setFromMatrixColumn(t.matrix,0),a.crossVectors(t.up,a),t.position.addScaledVector(a,e)},this.moveRight=function(e){a.setFromMatrixColumn(t.matrix,0),t.position.addScaledVector(a,e)},this.lock=function(){this.domElement.requestPointerLock()},this.unlock=function(){n.domElement.ownerDocument.exitPointerLock()},this.connect()};THREE.PointerLockControls.prototype=Object.create(THREE.EventDispatcher.prototype),THREE.PointerLockControls.prototype.constructor=THREE.PointerLockControls;
@@ -216,14 +294,11 @@
         }
 
         function createScreen(w, h, data) {
-            // TAMAÑO ESTÁNDAR PARA BANNER VERTICAL (SI NO SE ESPECIFICA)
             const finalW = 3.5; 
             const finalH = 5.0;
 
             let tex = data.img ? textureLoader.load(data.img) : null;
             
-            // MATERIAL QUE BRILLA SIEMPRE (MeshBasicMaterial)
-            // Si no carga la imagen, pone un gris oscuro
             const mat = tex ? new THREE.MeshBasicMaterial({ map: tex }) : new THREE.MeshBasicMaterial({ color: 0x444 });
             
             const mesh = new THREE.Mesh(new THREE.PlaneGeometry(finalW, finalH), mat);
@@ -324,7 +399,7 @@
             screen.position.set(0, 3.5, 0); group.add(screen);
         }
 
-        // TIPO 4: Holograma Proyectado (CORREGIDO)
+        // TIPO 4: Holograma Proyectado
         function buildStandType4(group, data) {
             const baseH = 0.2;
             const base = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, baseH, 32), matBlackMetal);
@@ -332,7 +407,6 @@
             const baseRing = new THREE.Mesh(new THREE.TorusGeometry(4, 0.05, 16, 32), matNeonOrange);
             baseRing.rotation.x = Math.PI/2; baseRing.position.y = baseH + 0.05; group.add(baseRing);
             
-            // PROYECTOR
             const topH = 7.5; 
             const proj = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.3, 32), matBlackMetal);
             proj.position.y = topH; group.add(proj);
@@ -342,11 +416,8 @@
             addLocalLight(group, 0xff4400, 1.2, 12, 0, 2, 0); 
             addLocalLight(group, 0xffffff, 1.0, 10, 0, topH - 1, 0); 
 
-            // BANNER VERTICAL - MATERIAL SÓLIDO QUE BRILLA
-            // Ya no usamos opacidad para asegurar visibilidad del banner
             const screen = createScreen(null, null, data);
             screen.position.set(0, (topH/2) + 0.5, 0); 
-            // Asegurar que NO sea transparente para que no desaparezca contra el fondo
             screen.material.transparent = false; 
             screen.material.opacity = 1.0;
             group.add(screen);
@@ -385,7 +456,6 @@
             addLocalLight(group, 0xff6600, 1.0, 20, 0, 2, 5);
             addLocalLight(group, 0xffffff, 0.8, 20, 0, 9, 5);
             
-            // PANTALLA GIGANTE HORIZONTAL (Excepción)
             let tex = data.img ? textureLoader.load(data.img) : null;
             const mat = tex ? new THREE.MeshBasicMaterial({ map: tex }) : new THREE.MeshBasicMaterial({ color: 0x555 });
             const screen = new THREE.Mesh(new THREE.PlaneGeometry(8, 6), mat); 
@@ -514,8 +584,18 @@
             }
         }
 
+        // MODAL ACTUALIZADO CON LINKS DINÁMICOS
         function openModal(d) {
             document.getElementById('m-title').innerText = d.t;
+            
+            // Actualizar botón de oferta
+            const btnBuy = document.getElementById('m-buy');
+            btnBuy.href = d.offer || "#";
+            
+            // Actualizar botón de PDF
+            const btnDoc = document.getElementById('m-doc');
+            btnDoc.href = d.pdf || "#";
+
             const content = d.vid ? IFRAME_TEMPLATE(d.vid) : '<h2 style="color:white;">VIDEO PENDIENTE</h2>';
             document.getElementById('video-wrapper').innerHTML = content;
             document.getElementById('stand-modal').style.display = 'flex';
