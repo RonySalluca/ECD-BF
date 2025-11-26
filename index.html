@@ -408,15 +408,17 @@
         const cardTexture = createGoldCardTexture();
         const beamTexture = createBeamTexture();
 
-        // MATERIALES
-        const matBlackMetal = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.2, metalness: 0.6 });
-        const matDarkStone = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
+        // MATERIALES OPTIMIZADOS (Fase 3: Cambio de Standard a Lambert)
+        // MeshLambertMaterial es MUCHO más rápido que MeshStandardMaterial
+        const matBlackMetal = new THREE.MeshLambertMaterial({ color: 0x222222 }); // Antes Standard
+        const matDarkStone = new THREE.MeshLambertMaterial({ color: 0x111111 }); // Antes Standard
         const matNeonOrange = new THREE.MeshBasicMaterial({ color: 0xff4400 }); 
         const matNeonWhite = new THREE.MeshBasicMaterial({ color: 0xffffff });  
         const matNeonCyan = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-        const matWhiteFrame = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.2 }); 
+        const matWhiteFrame = new THREE.MeshLambertMaterial({ color: 0xeeeeee }); // Antes Standard
 
         // MATERIALES DEL ENTORNO (MAZZANTI)
+        // Mantenemos Standard aquí para conservar el look metálico del techo, pero le quitamos las luces que le pegan
         const metalRoofMaterial = new THREE.MeshStandardMaterial({
             color: 0xe0e0e0, roughness: 0.2, metalness: 0.9, side: THREE.DoubleSide, emissive: 0x111111 
         });
@@ -449,10 +451,12 @@
             camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
             camera.position.set(0, 1.7, 30); 
 
-            const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+            // OPTIMIZACIÓN: Aumentamos luz ambiental para compensar la eliminación de luces locales
+            const ambient = new THREE.AmbientLight(0xffffff, 0.7); // Subido de 0.3 a 0.7
             scene.add(ambient);
             
-            const mainLight = new THREE.DirectionalLight(0x88aaff, 0.5);
+            // OPTIMIZACIÓN: Aumentamos luz solar
+            const mainLight = new THREE.DirectionalLight(0x88aaff, 1.0); // Subido de 0.5 a 1.0
             mainLight.position.set(-50, 80, -30);
             mainLight.castShadow = true;
             
@@ -660,15 +664,18 @@
                 group.add(innerVol);
 
                 lightPoints.forEach(point => {
-                    const interiorLight = new THREE.PointLight(0xffaa55, 2.0, 40); 
-                    interiorLight.position.set(point.x, point.y - 2.0, point.z);
-                    // OPTIMIZACIÓN: Las luces secundarias no proyectan sombra
-                    interiorLight.castShadow = false; 
-                    group.add(interiorLight);
+                    // OPTIMIZACIÓN: COMENTADAS LAS LUCES LOCALES PARA GANAR FPS
+                    // const interiorLight = new THREE.PointLight(0xffaa55, 2.0, 40); 
+                    // interiorLight.position.set(point.x, point.y - 2.0, point.z);
+                    // interiorLight.castShadow = false; 
+                    // group.add(interiorLight);
 
-                    const lampGeo = new THREE.SphereGeometry(0.3, 16, 16);
+                    // Simplificación de geometría: 16 -> 8
+                    const lampGeo = new THREE.SphereGeometry(0.3, 8, 8);
                     const lampMesh = new THREE.Mesh(lampGeo, lampMaterial);
-                    lampMesh.position.copy(interiorLight.position);
+                    // lampMesh.position.copy(interiorLight.position);
+                    // Re-cálculo manual de posición ya que no tenemos la luz
+                    lampMesh.position.set(point.x, point.y - 2.0, point.z);
                     group.add(lampMesh);
                 });
             }
@@ -692,25 +699,31 @@
         }
         
         function addLocalLight(group, color, intensity, distance, x, y, z) {
+            // OPTIMIZACIÓN: FUNCIÓN VACÍA.
+            // Eliminamos las PointLights locales para reducir drásticamente el costo de renderizado.
+            // Confiamos en la AmbientLight fuerte + materiales Basic (neón) para la estética.
+            
+            /*
             const light = new THREE.PointLight(color, intensity, distance);
             light.position.set(x, y, z);
-            light.castShadow = false; // Confirmando que no proyecten sombra
+            light.castShadow = false; 
             group.add(light);
+            */
         }
 
-        // STANDS
+        // STANDS - OPTIMIZACIÓN DE POLÍGONOS (Cilindros 32->16, Torus 32->16)
         function buildStandType1(group, data) {
             for(let i=0; i<3; i++) {
                 const r = 3.5 - (i*0.5); const h = 0.2;
-                const base = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 32), matBlackMetal);
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 16), matBlackMetal);
                 base.position.y = i*h; base.receiveShadow = true; group.add(base);
-                const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.02, 16, 32), matNeonOrange);
+                const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.02, 8, 24), matNeonOrange);
                 ring.rotation.x = Math.PI/2; ring.position.y = i*h + h/2; group.add(ring);
             }
             const archGeo = new THREE.TorusGeometry(3.2, 0.4, 6, 12, Math.PI * 1.2); 
             const arch = new THREE.Mesh(archGeo, matDarkStone);
             arch.rotation.z = 0.6; arch.position.y = 3.5; arch.castShadow = true; group.add(arch);
-            const archLight = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.05, 8, 32, Math.PI * 1.2), matNeonWhite);
+            const archLight = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.05, 6, 24, Math.PI * 1.2), matNeonWhite);
             archLight.rotation.z = 0.6; archLight.position.y = 3.5; group.add(archLight);
             addLocalLight(group, 0xff6600, 0.8, 8, 0, 1, 0);
             addLocalLight(group, 0xffffff, 0.6, 8, 0, 4, 0);
@@ -719,17 +732,17 @@
         }
 
         function buildStandType2(group, data) {
-            const base = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 3.5, 0.3, 32), matBlackMetal);
+            const base = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 3.5, 0.3, 16), matBlackMetal);
             base.position.y = 0.15; base.receiveShadow = true; group.add(base);
-            const baseRing = new THREE.Mesh(new THREE.TorusGeometry(3.5, 0.05, 16, 32), matNeonOrange);
+            const baseRing = new THREE.Mesh(new THREE.TorusGeometry(3.5, 0.05, 8, 24), matNeonOrange);
             baseRing.rotation.x = Math.PI/2; baseRing.position.y = 0.3; group.add(baseRing);
-            const bigRhombus = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.2, 8, 4), matWhiteFrame);
+            const bigRhombus = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.2, 4, 4), matWhiteFrame); // 4 segmentos es un rombo real
             bigRhombus.rotation.z = 0; bigRhombus.position.set(0, 4.5, -0.5); bigRhombus.castShadow = true; group.add(bigRhombus);
-            const bigLight = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.05, 8, 4), matNeonWhite);
+            const bigLight = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.05, 4, 4), matNeonWhite);
             bigLight.rotation.z = 0; bigLight.position.set(0, 4.5, -0.4); group.add(bigLight);
-            const midRhombus = new THREE.Mesh(new THREE.TorusGeometry(3.8, 0.2, 8, 4), matWhiteFrame);
+            const midRhombus = new THREE.Mesh(new THREE.TorusGeometry(3.8, 0.2, 4, 4), matWhiteFrame);
             midRhombus.rotation.z = 0; midRhombus.position.set(0, 4.5, 0); midRhombus.castShadow = true; group.add(midRhombus);
-            const midLight = new THREE.Mesh(new THREE.TorusGeometry(3.8, 0.05, 8, 4), matNeonWhite);
+            const midLight = new THREE.Mesh(new THREE.TorusGeometry(3.8, 0.05, 4, 4), matNeonWhite);
             midLight.rotation.z = 0; midLight.position.set(0, 4.5, 0.1); group.add(midLight);
             addLocalLight(group, 0xff4400, 1.0, 10, 0, 1, 2);
             addLocalLight(group, 0xffffff, 0.8, 10, 0, 5, 0);
@@ -738,9 +751,9 @@
         }
 
         function buildStandType3(group, data) {
-            const base = new THREE.Mesh(new THREE.CylinderGeometry(4, 4.2, 0.3, 32), matDarkStone);
+            const base = new THREE.Mesh(new THREE.CylinderGeometry(4, 4.2, 0.3, 16), matDarkStone);
             base.position.y = 0.15; base.receiveShadow = true; group.add(base);
-            const ring = new THREE.Mesh(new THREE.TorusGeometry(4, 0.05, 8, 32), matNeonOrange);
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(4, 0.05, 8, 24), matNeonOrange);
             ring.rotation.x = Math.PI/2; ring.position.y = 0.3; group.add(ring);
             for(let i=0; i<7; i++) {
                 const angle = (Math.PI/8) * (i - 3); 
@@ -758,14 +771,14 @@
 
         function buildStandType4(group, data) {
             const baseH = 0.2;
-            const base = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, baseH, 32), matBlackMetal);
+            const base = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, baseH, 16), matBlackMetal);
             base.position.y = baseH/2; base.receiveShadow = true; group.add(base);
-            const baseRing = new THREE.Mesh(new THREE.TorusGeometry(4, 0.05, 16, 32), matNeonOrange);
+            const baseRing = new THREE.Mesh(new THREE.TorusGeometry(4, 0.05, 8, 24), matNeonOrange);
             baseRing.rotation.x = Math.PI/2; baseRing.position.y = baseH + 0.05; group.add(baseRing);
             const topH = 7.5; 
-            const proj = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.3, 32), matBlackMetal);
+            const proj = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.3, 16), matBlackMetal);
             proj.position.y = topH; group.add(proj);
-            const projRing = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.05, 16, 32), matNeonWhite);
+            const projRing = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.05, 8, 24), matNeonWhite);
             projRing.rotation.x = Math.PI/2; projRing.position.y = topH - 0.15; group.add(projRing);
             addLocalLight(group, 0xff4400, 1.2, 12, 0, 2, 0); 
             addLocalLight(group, 0xffffff, 1.0, 10, 0, topH - 1, 0); 
@@ -776,9 +789,9 @@
         }
 
         function buildStandType5(group, data) {
-            const base = new THREE.Mesh(new THREE.CylinderGeometry(3, 3.5, 0.5, 32), matBlackMetal);
+            const base = new THREE.Mesh(new THREE.CylinderGeometry(3, 3.5, 0.5, 16), matBlackMetal);
             base.position.y = 0.25; base.receiveShadow = true; group.add(base);
-            const lightRing = new THREE.Mesh(new THREE.TorusGeometry(3.5, 0.05, 16, 32), matNeonOrange);
+            const lightRing = new THREE.Mesh(new THREE.TorusGeometry(3.5, 0.05, 8, 24), matNeonOrange);
             lightRing.rotation.x = Math.PI/2; lightRing.position.y = 0.25; group.add(lightRing);
             for(let i=0; i<3; i++) {
                 const size = 4.5 - (i*0.8); 
@@ -799,14 +812,15 @@
             vipGroup.position.copy(position);
             group.add(vipGroup);
 
-            const baseGeo = new THREE.CylinderGeometry(2.2, 2.5, 0.6, 64);
+            const baseGeo = new THREE.CylinderGeometry(2.2, 2.5, 0.6, 32);
             const base = new THREE.Mesh(baseGeo, matBlackMetal);
             base.position.y = 0.3; vipGroup.add(base);
-            const neonGeo = new THREE.TorusGeometry(2.2, 0.05, 16, 100);
+            const neonGeo = new THREE.TorusGeometry(2.2, 0.05, 8, 64);
             const neonMat = new THREE.MeshBasicMaterial({ color: 0xffd700 }); 
             const neon = new THREE.Mesh(neonGeo, neonMat);
             neon.rotation.x = Math.PI / 2; neon.position.y = 0.62; vipGroup.add(neon);
-            const light = new THREE.PointLight(0xffd700, 1.5, 8); light.position.set(0, 0.8, 0); light.castShadow = false; vipGroup.add(light);
+            // OPTIMIZACIÓN: COMENTADO - Luz dinámica del VIP
+            // const light = new THREE.PointLight(0xffd700, 1.5, 8); light.position.set(0, 0.8, 0); light.castShadow = false; vipGroup.add(light);
 
             const cardWrapper = new THREE.Group();
             cardWrapper.position.y = 2.5; 
@@ -818,6 +832,7 @@
             const cardGroup = new THREE.Group(); cardWrapper.add(cardGroup);
             const cardGeo = new THREE.PlaneGeometry(3.8 * 0.7, 2.4 * 0.7);
 
+            // Mantenemos Standard aquí porque el efecto de oro lo necesita
             const mainCardMat = new THREE.MeshStandardMaterial({
                 map: cardTexture, roughness: 0.3, metalness: 0.6, side: THREE.DoubleSide, emissive: 0x332200, emissiveIntensity: 0.2
             });
@@ -840,7 +855,8 @@
             beamMesh.position.y = -0.5 * 0.7; beamMesh.rotation.x = Math.PI; cardWrapper.add(beamMesh);
 
             const particlesGeo = new THREE.BufferGeometry();
-            const pCount = 150; const pPos = new Float32Array(pCount * 3);
+            const pCount = 100; // Reducido de 150 a 100
+            const pPos = new Float32Array(pCount * 3);
             for(let i=0; i<pCount*3; i++) pPos[i] = (Math.random()-0.5)*5; 
             particlesGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
             const particlesMat = new THREE.PointsMaterial({ color: 0xffcc00, size: 0.03, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
@@ -888,8 +904,8 @@
         }
 
         function buildDetailedMainExit(group, data) { 
-            const matDarkMetal = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.2, metalness: 0.5 });
-            const matFloor = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 });
+            const matDarkMetal = new THREE.MeshLambertMaterial({ color: 0x222222 }); // Standard -> Lambert
+            const matFloor = new THREE.MeshLambertMaterial({ color: 0x222222 }); // Standard -> Lambert
             const stepGeo = new THREE.BoxGeometry(12, 0.4, 3);
             const step = new THREE.Mesh(stepGeo, matFloor);
             step.position.set(0, 0.2, 1.5); group.add(step);
@@ -920,8 +936,8 @@
         }
 
         function buildDetailedSideExit(group, data) { 
-            const matDarkMetal = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.3, metalness: 0.4 }); 
-            const matFloor = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 });
+            const matDarkMetal = new THREE.MeshLambertMaterial({ color: 0x333333 }); // Standard -> Lambert
+            const matFloor = new THREE.MeshLambertMaterial({ color: 0x222222 }); // Standard -> Lambert
             const basePlatform = new THREE.Mesh(new THREE.BoxGeometry(9, 0.3, 2.5), matFloor);
             basePlatform.position.set(0, 0.15, 0); group.add(basePlatform);
             const baseEdge = new THREE.Mesh(new THREE.BoxGeometry(9, 0.05, 0.05), matNeonOrange); 
@@ -931,7 +947,7 @@
             const pilarGeo = new THREE.CylinderGeometry(0.5, 0.5, archHeight, 16);
             const pilarL = new THREE.Mesh(pilarGeo, matDarkMetal); pilarL.position.set(-archWidth/2, archHeight/2 + 0.3, 0); group.add(pilarL);
             const pilarR = new THREE.Mesh(pilarGeo, matDarkMetal); pilarR.position.set(archWidth/2, archHeight/2 + 0.3, 0); group.add(pilarR);
-            const archTop = new THREE.Mesh(new THREE.TorusGeometry(archWidth/2, 0.5, 16, 32, Math.PI), matDarkMetal);
+            const archTop = new THREE.Mesh(new THREE.TorusGeometry(archWidth/2, 0.5, 8, 24, Math.PI), matDarkMetal);
             archTop.position.set(0, archHeight/2 + 0.3, 0); archTop.rotation.z = Math.PI; group.add(archTop);
 
             const ringGeo = new THREE.TorusGeometry(0.55, 0.05, 8, 16);
@@ -939,7 +955,7 @@
                 const ringL = new THREE.Mesh(ringGeo, matNeonWhite); ringL.rotation.x = Math.PI/2; ringL.position.set(-archWidth/2, y + 0.3, 0); group.add(ringL); 
                 const ringR = new THREE.Mesh(ringGeo, matNeonWhite); ringR.rotation.x = Math.PI/2; ringR.position.set(archWidth/2, y + 0.3, 0); group.add(ringR); 
             }
-            const archNeon = new THREE.Mesh(new THREE.TorusGeometry(archWidth/2, 0.05, 8, 32, Math.PI), matNeonWhite); 
+            const archNeon = new THREE.Mesh(new THREE.TorusGeometry(archWidth/2, 0.05, 8, 24, Math.PI), matNeonWhite); 
             archNeon.position.set(0, archHeight/2 + 0.3, 0.6); archNeon.rotation.z = Math.PI; group.add(archNeon); 
 
             const portalW = archWidth - 1; const portalH = archHeight + (archWidth/2) - 1; 
