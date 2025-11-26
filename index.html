@@ -141,19 +141,6 @@
             position: relative; overflow: hidden; 
         }
 
-        /* Ajuste modal para móvil */
-        @media (max-width: 768px) {
-            .modal-card { flex-direction: column; height: 90vh; width: 95%; }
-            .vid-container { height: 40%; margin: 0; width: 100%; border: none; border-bottom: 1px solid #333; }
-            .info-container { height: 60%; padding: 20px; margin: 0; border-left: none; text-align: center; overflow-y: auto; }
-            .info-container h2 { font-size: 2.5rem; }
-            .marquee { display: none; }
-            #start-btn { font-size: 2rem; padding: 15px 40px; }
-            #main-logo { width: 80vw; }
-            .corner-logo { width: 25vw; }
-            .instructions { display: none; }
-        }
-
         /* Cintas animadas del modal */
         .marquee {
             position: absolute; background: #000000; color: #ff4400;
@@ -202,6 +189,63 @@
         .btn-buy:hover { background: #fff; color: #ff4400; box-shadow: 0 0 30px rgba(255, 68, 0, 0.6); }
         .btn-doc { border: 1px solid #555; color: #aaa; background: transparent; }
         .btn-doc:hover { border-color: #ff4400; color: #ff4400; }
+
+        /* ========================================================================== */
+        /* AJUSTES RESPONSIVE PARA MÓVIL (Compacto y visible de un vistazo) */
+        /* ========================================================================== */
+        @media (max-width: 768px) {
+            /* Modal más pequeño para asegurar que quepa todo */
+            .modal-card { 
+                flex-direction: column; 
+                height: 75vh; /* Reducido de 85vh para evitar cortar en pantallas pequeñas */
+                width: 90%; 
+                max-height: 550px; /* Limite estricto de altura */
+            }
+            
+            /* Video compacto */
+            .vid-container { 
+                flex: 0 0 30%; /* Solo el 30% de altura */
+                margin: 0; 
+                width: 100%; 
+                border: none; 
+                border-bottom: 1px solid #333; 
+            }
+            
+            /* Info container optimizado */
+            .info-container { 
+                flex: 1; 
+                padding: 10px; /* Padding mínimo */
+                margin: 0; 
+                border-left: none; 
+                text-align: center; 
+                overflow-y: hidden; /* Evitar scroll si es posible */
+                display: flex;
+                flex-direction: column;
+                justify-content: center; /* Centrar contenido verticalmente */
+            }
+            
+            /* Título mucho más pequeño */
+            .info-container h2 { 
+                font-size: 1.5rem; /* Reducido drásticamente de 2.5rem */
+                margin: 5px 0 10px 0;
+                line-height: 1.1;
+            }
+            
+            /* Botones compactos y pegados */
+            .btn-link {
+                padding: 10px; /* Botones más delgados */
+                margin-top: 8px;
+                font-size: 1.1rem; 
+            }
+
+            .close-btn { font-size: 2rem; top: 5px; right: 10px; } /* X más pequeña */
+
+            .marquee { display: none; }
+            #start-btn { font-size: 2rem; padding: 15px 40px; }
+            #main-logo { width: 80vw; }
+            .corner-logo { width: 25vw; }
+            .instructions { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -381,6 +425,8 @@
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
             camera.position.set(0, 1.7, 30); 
+            // FORZAR CÁMARA SIEMPRE VERTICAL (EVITA INCLINACIÓN LATERAL)
+            camera.up.set(0, 1, 0);
 
             // ILUMINACIÓN OPTIMIZADA
             const ambient = new THREE.AmbientLight(0xffffff, 0.7); 
@@ -1033,6 +1079,9 @@
 
             // MOVIMIENTO MÓVIL (JOYSTICKS)
             if (isMobile) {
+                // CORRECCIÓN CÁMARA CHUECA: Asegurar que "Arriba" siempre sea Y+
+                camera.up.set(0, 1, 0);
+
                 if (joyL.active) {
                     const speed = 15.0 * delta; // CAMBIO VELOCIDAD
                     const dir = new THREE.Vector3();
@@ -1053,8 +1102,11 @@
                     
                     // Rotar cámara (Pitch - arriba/abajo) con clamp
                     camera.rotation.x -= joyR.current.y * rotSpeed;
-                    // Limitar la rotación vertical para no dar la vuelta completa (aprox 80 grados arriba/abajo)
+                    // Limitar la rotación vertical para no dar la vuelta completa
                     camera.rotation.x = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, camera.rotation.x));
+                    
+                    // CORRECCIÓN CÁMARA CHUECA: Anular cualquier rotación en Z (roll)
+                    camera.rotation.z = 0; 
                 }
 
             } else {
