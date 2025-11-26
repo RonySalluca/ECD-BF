@@ -237,7 +237,6 @@
 
     <script>
         const IFRAME_TEMPLATE = (url) => `<iframe width="100%" height="100%" src="${url}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
-        const V1 = "https://www.youtube-nocookie.com/embed/mZ_uPr7rHT4?si=s-docLxR3NVd3Q5T";
         
         // =====================================================================================
         // CONFIGURACIÓN DE STANDS Y LINKS
@@ -251,8 +250,8 @@
                 type: 1, 
                 img: 'img/stand1.jpg', 
                 vid: "https://www.youtube.com/embed/QYIhIN6BmaY", 
-                offer: "https://wa.link/f86xlv", // <--- PON AQUÍ EL LINK DE COMPRA PARA EL STAND 1
-                pdf: "https://www.escuelaconstrucciondigital.com/blackfriday"    // <--- PON AQUÍ EL LINK DEL PDF PARA EL STAND 1
+                offer: "https://wa.link/f86xlv", 
+                pdf: "https://www.escuelaconstrucciondigital.com/blackfriday"
             },
             { 
                 t: "DIRECCIÓN DE PROYECTOS DE CONSTRUCCIÓN", 
@@ -260,7 +259,7 @@
                 type: 2, 
                 img: 'img/stand2.jpg', 
                 vid: "https://www.youtube.com/embed/iGDq7k4PVac", 
-                offer: "https://wa.link/ayzc8v", // <--- LINK STAND 2
+                offer: "https://wa.link/ayzc8v", 
                 pdf: "https://www.escuelaconstrucciondigital.com/bundle/re-direccion-de-proyectos-de-construccion" 
             },
             { 
@@ -337,7 +336,7 @@
                 type: 'main', 
                 img: 'img/stand_principal.jpg', 
                 vid: "https://www.youtube.com/embed/HgoKDJcGn1k", 
-                offer: "https://wa.link/2foufd", // <--- LINK OFERTA PRINCIPAL
+                offer: "https://wa.link/2foufd", 
                 pdf: "#" 
             },
 
@@ -369,6 +368,10 @@
         let prevTime = performance.now();
         const velocity = new THREE.Vector3();
         const direction = new THREE.Vector3();
+        
+        // Optimización: Vector reutilizable para el loop
+        const CENTER_SCREEN = new THREE.Vector2(0, 0);
+
         const interactables = []; 
         const screensToAnimate = []; 
         const vipDisplaysToAnimate = []; 
@@ -425,12 +428,21 @@
         });
         const lampMaterial = new THREE.MeshBasicMaterial({ color: 0xffddaa });
 
+        // Función de Optimización: Congela objetos que no se mueven
+        function freezeStatic(object) {
+            object.updateMatrix();
+            object.matrixAutoUpdate = false; 
+            if (object.children && object.children.length > 0) {
+                object.children.forEach(child => freezeStatic(child));
+            }
+        }
+
         init();
         animate();
 
         function init() {
             scene = new THREE.Scene();
-            const bgColor = 0x050510; // Cielo claro
+            const bgColor = 0x050510; 
             scene.background = new THREE.Color(bgColor); 
             scene.fog = new THREE.FogExp2(bgColor, 0.002);
 
@@ -443,20 +455,34 @@
             const mainLight = new THREE.DirectionalLight(0x88aaff, 0.5);
             mainLight.position.set(-50, 80, -30);
             mainLight.castShadow = true;
-            mainLight.shadow.mapSize.width = 2048;
-            mainLight.shadow.mapSize.height = 2048;
+            
+            // --- OPTIMIZACIÓN FASE 2: REDUCCIÓN DE SOMBRAS ---
+            mainLight.shadow.mapSize.width = 1024; // Reducido de 2048
+            mainLight.shadow.mapSize.height = 1024;
             mainLight.shadow.camera.left = -100;
             mainLight.shadow.camera.right = 100;
             mainLight.shadow.camera.top = 100;
             mainLight.shadow.camera.bottom = -100;
             scene.add(mainLight);
 
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            // --- OPTIMIZACIÓN FASE 1: RENDERER SETTINGS ---
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                powerPreference: "high-performance" // Sugiere usar GPU dedicada
+            });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.toneMappingExposure = 1.1;
+            
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+            // SOMBRAS ESTÁTICAS: Solo calcular una vez
+            renderer.shadowMap.autoUpdate = false; 
+
+            // LÍMITE DE PÍXELES PARA MÓVILES (Fase 1)
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
             document.body.appendChild(renderer.domElement);
 
             controls = new THREE.PointerLockControls(camera, document.body);
@@ -471,15 +497,12 @@
 
             controls.addEventListener('lock', () => {
                 blocker.style.opacity = 0;
-                // Esperar a que la transición termine para ocultar
                 setTimeout(() => { blocker.style.display = 'none'; }, 500);
             });
 
             controls.addEventListener('unlock', () => {
-                // Solo mostrar el blocker si NO estamos viendo un stand
                 if(document.getElementById('stand-modal').style.display !== 'flex') {
                     blocker.style.display = 'flex';
-                    // Forzar un reflow para que la transición de opacidad funcione
                     void blocker.offsetWidth; 
                     blocker.style.opacity = 1;
                     startBtn.innerText = "REANUDAR"; 
@@ -495,6 +518,9 @@
 
             buildEnvironment(); 
             buildLayout(); 
+
+            // Forzar actualización inicial de sombras una vez que todo está cargado
+            renderer.shadowMap.needsUpdate = true;
         }
 
         function onKey(e, v) {
@@ -636,6 +662,7 @@
                 lightPoints.forEach(point => {
                     const interiorLight = new THREE.PointLight(0xffaa55, 2.0, 40); 
                     interiorLight.position.set(point.x, point.y - 2.0, point.z);
+                    // OPTIMIZACIÓN: Las luces secundarias no proyectan sombra
                     interiorLight.castShadow = false; 
                     group.add(interiorLight);
 
@@ -648,6 +675,8 @@
             if (firstCurve) group.add(createFacade(-(galleryLength / 2), firstCurve));
             if (lastCurve) group.add(createFacade((galleryLength / 2), lastCurve));
             
+            // CONGELAR ENTORNO (FASE 3)
+            freezeStatic(group);
             scene.add(group);
         }
 
@@ -662,23 +691,10 @@
             return mesh;
         }
         
-        function createSalidaSignTexture() {
-            const cvs = document.createElement('canvas'); cvs.width=512; cvs.height=128;
-            const ctx = cvs.getContext('2d');
-            ctx.fillStyle = '#111'; ctx.fillRect(0,0,512,128);
-            ctx.strokeStyle = '#00d2ff'; ctx.lineWidth = 8; ctx.strokeRect(4,4,504,120);
-            ctx.fillStyle = '#00d2ff'; ctx.font = 'bold 80px "Teko", sans-serif'; 
-            ctx.textAlign = 'center'; ctx.textBaseline='middle';
-            ctx.fillText("SALIDA", 256, 64);
-            ctx.shadowColor = '#00d2ff'; ctx.shadowBlur = 20;
-            ctx.fillText("SALIDA", 256, 64);
-            return new THREE.CanvasTexture(cvs);
-        }
-
         function addLocalLight(group, color, intensity, distance, x, y, z) {
             const light = new THREE.PointLight(color, intensity, distance);
             light.position.set(x, y, z);
-            light.castShadow = false;
+            light.castShadow = false; // Confirmando que no proyecten sombra
             group.add(light);
         }
 
@@ -839,30 +855,23 @@
             vipDisplaysToAnimate.push(vipGroup);
         }
 
-        function buildMainStand(group, data) { // Principal MODIFICADO (Sin muro trasero)
-            // Se ha eliminado el muro (wall) y los marcos de luz traseros.
-            // Solo queda la base y la pantalla flotante.
-
-            // Base simple para marcar el sitio (opcional, pero ayuda a anclar)
+        function buildMainStand(group, data) { 
             const base = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 0.2, 32), matBlackMetal);
             base.position.y = 0.1; base.receiveShadow = true; group.add(base);
             const baseLight = new THREE.Mesh(new THREE.TorusGeometry(5, 0.05, 16, 32), matNeonOrange);
             baseLight.rotation.x = Math.PI/2; baseLight.position.y = 0.2; group.add(baseLight);
 
-            // Luces ambientales del stand (flotando para iluminar la zona)
             addLocalLight(group, 0xff6600, 0.8, 20, 0, 2, 5);
             
-            // PANTALLA GIGANTE FLOTANTE (Más grande: 12x8)
             let tex = data.img ? textureLoader.load(data.img) : null;
             const mat = tex ? new THREE.MeshBasicMaterial({ map: tex }) : new THREE.MeshBasicMaterial({ color: 0x555 });
             const screen = new THREE.Mesh(new THREE.PlaneGeometry(12, 8), mat); 
-            screen.position.set(0, 6, 0); // Elevada para que se vea imponente
+            screen.position.set(0, 6, 0); 
             screen.userData = { data: data };
             interactables.push(screen);
-            screensToAnimate.push(screen); // Mantiene el efecto Billboard
+            screensToAnimate.push(screen); 
             group.add(screen);
 
-            // DISPLAYS VIP A LOS LADOS
             buildVIPDisplay(group, new THREE.Vector3(-8, 0, 3));
             buildVIPDisplay(group, new THREE.Vector3(8, 0, 3));
         }
@@ -966,7 +975,18 @@
                 else if(d.type === 'main') buildMainStand(group, d);
                 else if(d.type === 'exit-main') buildDetailedMainExit(group, d);
                 else if(d.type === 'exit-side') buildDetailedSideExit(group, d);
+                
+                // CONGELAR STAND (FASE 3)
+                freezeStatic(group);
                 scene.add(group);
+            });
+            
+            // REACTIVAR MATRICES PARA OBJETOS MÓVILES
+            // (Porque freezeStatic congela todo el grupo, necesitamos reactivar las pantallas)
+            screensToAnimate.forEach(screen => screen.matrixAutoUpdate = true);
+            vipDisplaysToAnimate.forEach(group => {
+                group.matrixAutoUpdate = true;
+                group.traverse(child => child.matrixAutoUpdate = true);
             });
         }
 
@@ -1012,6 +1032,7 @@
             const time = performance.now();
             const timeSec = time / 1000;
 
+            // OPTIMIZACIÓN: Las pantallas se actualizan porque reactivamos matrixAutoUpdate
             screensToAnimate.forEach(screen => {
                 screen.lookAt(camera.position.x, screen.position.y, camera.position.z);
             });
@@ -1023,7 +1044,8 @@
             });
 
             if(controls.isLocked) {
-                raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+                // OPTIMIZACIÓN: Usar vector global en vez de crear uno nuevo
+                raycaster.setFromCamera(CENTER_SCREEN, camera);
                 const intersects = raycaster.intersectObjects(interactables);
                 const msg = document.getElementById('interaction-msg');
                 const ch = document.getElementById('crosshair');
