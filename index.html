@@ -191,56 +191,67 @@
         .btn-doc:hover { border-color: #ff4400; color: #ff4400; }
 
         /* ========================================================================== */
-        /* AJUSTES RESPONSIVE PARA MÓVIL (Compacto y visible de un vistazo) */
+        /* AJUSTES RESPONSIVE PARA MÓVIL - DEFINITIVO */
+        /* Estructura completa + Textos reducidos + Sin Scroll */
         /* ========================================================================== */
         @media (max-width: 768px) {
-            /* Modal más pequeño para asegurar que quepa todo */
+            /* El modal ocupa la pantalla completa pero con márgenes pequeños */
             .modal-card { 
                 flex-direction: column; 
-                height: 75vh; /* Reducido de 85vh para evitar cortar en pantallas pequeñas */
-                width: 90%; 
-                max-height: 550px; /* Limite estricto de altura */
+                height: 95vh; /* Máxima altura posible */
+                width: 95%; 
+                max-height: none;
+                padding: 0; 
+                justify-content: flex-start;
             }
             
-            /* Video compacto */
+            /* Video: Prioridad visual, ocupa casi la mitad superior */
             .vid-container { 
-                flex: 0 0 30%; /* Solo el 30% de altura */
-                margin: 0; 
-                width: 100%; 
-                border: none; 
-                border-bottom: 1px solid #333; 
+                flex: 0 0 45%; /* 45% de la altura disponible */
+                margin: 35px 15px 10px 15px; /* Margen superior para la cinta */
+                width: auto; 
+                border: 1px solid #333; 
             }
             
-            /* Info container optimizado */
+            /* Info: Se adapta al espacio restante */
             .info-container { 
                 flex: 1; 
-                padding: 10px; /* Padding mínimo */
-                margin: 0; 
-                border-left: none; 
+                padding: 10px 15px; 
+                margin: 0 15px 35px 15px; /* Margen inferior para la cinta */
+                border: 1px solid #333; 
+                border-top: none;
                 text-align: center; 
-                overflow-y: hidden; /* Evitar scroll si es posible */
                 display: flex;
                 flex-direction: column;
-                justify-content: center; /* Centrar contenido verticalmente */
+                justify-content: space-evenly; /* Distribuir elementos uniformemente */
+                overflow: hidden; /* Evitar scroll */
             }
             
-            /* Título mucho más pequeño */
+            /* Título adaptativo */
             .info-container h2 { 
-                font-size: 1.5rem; /* Reducido drásticamente de 2.5rem */
-                margin: 5px 0 10px 0;
-                line-height: 1.1;
+                font-size: 6vw; /* Tamaño relativo al ancho de pantalla */
+                margin: 0;
+                line-height: 1.0;
+                max-height: 3.2em; /* Limite de líneas */
+                overflow: hidden;
             }
             
-            /* Botones compactos y pegados */
+            /* Botones compactos */
             .btn-link {
-                padding: 10px; /* Botones más delgados */
-                margin-top: 8px;
-                font-size: 1.1rem; 
+                padding: 1.5vh; 
+                margin-top: 1vh;
+                font-size: 4.5vw; 
+                border-radius: 4px;
             }
 
-            .close-btn { font-size: 2rem; top: 5px; right: 10px; } /* X más pequeña */
+            /* Recuperar cintas en móvil pero ajustadas */
+            .marquee { height: 25px; } 
+            .marquee span { font-size: 0.9rem; padding: 0 10px; }
+            /* Asegurar que las cintas laterales no tapen contenido */
+            .marquee.left, .marquee.right { width: 25px; } 
 
-            .marquee { display: none; }
+            .close-btn { font-size: 2.5rem; top: 30px; right: 20px; z-index: 50; color: #fff; text-shadow: 0 0 5px #000; }
+
             #start-btn { font-size: 2rem; padding: 15px 40px; }
             #main-logo { width: 80vw; }
             .corner-logo { width: 25vw; }
@@ -425,8 +436,10 @@
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
             camera.position.set(0, 1.7, 30); 
-            // FORZAR CÁMARA SIEMPRE VERTICAL (EVITA INCLINACIÓN LATERAL)
-            camera.up.set(0, 1, 0);
+            
+            // CORRECCIÓN CRÍTICA: Orden de rotación YXZ para FPS (Yaw primero, luego Pitch)
+            // Esto elimina el problema de que la cámara se voltee o haga cosas raras al mirar a los lados.
+            camera.rotation.order = 'YXZ';
 
             // ILUMINACIÓN OPTIMIZADA
             const ambient = new THREE.AmbientLight(0xffffff, 0.7); 
@@ -1079,34 +1092,33 @@
 
             // MOVIMIENTO MÓVIL (JOYSTICKS)
             if (isMobile) {
-                // CORRECCIÓN CÁMARA CHUECA: Asegurar que "Arriba" siempre sea Y+
-                camera.up.set(0, 1, 0);
-
                 if (joyL.active) {
-                    const speed = 15.0 * delta; // CAMBIO VELOCIDAD
+                    const speed = 15.0 * delta; 
                     const dir = new THREE.Vector3();
                     camera.getWorldDirection(dir);
                     dir.y = 0; dir.normalize();
-                    
                     const side = new THREE.Vector3();
                     side.crossVectors(camera.up, dir).normalize(); 
-
                     camera.position.addScaledVector(dir, -joyL.current.y * speed);
                     camera.position.addScaledVector(side, -joyL.current.x * speed);
                 }
 
+                // --- JOYSTICK DERECHO (MIRADA ORTOGONAL ESTRICTA + CLAMP REINTEGRADO PARA EVITAR FLIPPING) ---
                 if (joyR.active) {
                     const rotSpeed = 2.0 * delta;
-                    // Rotar cámara (Yaw - izquierda/derecha)
-                    camera.rotation.y -= joyR.current.x * rotSpeed;
                     
-                    // Rotar cámara (Pitch - arriba/abajo) con clamp
-                    camera.rotation.x -= joyR.current.y * rotSpeed;
-                    // Limitar la rotación vertical para no dar la vuelta completa
-                    camera.rotation.x = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, camera.rotation.x));
-                    
-                    // CORRECCIÓN CÁMARA CHUECA: Anular cualquier rotación en Z (roll)
-                    camera.rotation.z = 0; 
+                    // MOVIMIENTO ORTOGONAL: Solo permite mover en UN eje a la vez (el que tenga mayor movimiento)
+                    if (Math.abs(joyR.current.x) > Math.abs(joyR.current.y)) {
+                        // Moverse SOLO horizontalmente
+                        camera.rotation.y -= joyR.current.x * rotSpeed;
+                    } else {
+                        // Moverse SOLO verticalmente
+                        camera.rotation.x -= joyR.current.y * rotSpeed;
+                        
+                        // CLAMP: IMPRESCINDIBLE para evitar el backflip
+                        // Te deja mirar casi totalmente arriba/abajo, pero frena antes de invertir el mundo.
+                        camera.rotation.x = Math.max(-Math.PI/2 + 0.1, Math.min(Math.PI/2 - 0.1, camera.rotation.x));
+                    }
                 }
 
             } else {
