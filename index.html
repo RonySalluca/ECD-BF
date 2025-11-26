@@ -894,7 +894,7 @@
             const pilarGeo = new THREE.CylinderGeometry(0.5, 0.5, archHeight, 16);
             const pilarL = new THREE.Mesh(pilarGeo, matDarkMetal); pilarL.position.set(-archWidth/2, archHeight/2 + 0.3, 0); group.add(pilarL);
             const pilarR = new THREE.Mesh(pilarGeo, matDarkMetal); pilarR.position.set(archWidth/2, archHeight/2 + 0.3, 0); group.add(pilarR);
-            const archTop = new THREE.Mesh(new THREE.TorusGeometry(archWidth/2, 0.5, 8, 24, Math.PI), matDarkMetal);
+            const archTop = new THREE.Mesh(new THREE.TorusGeometry(archWidth/2, 0.5, 16, 32, Math.PI), matDarkMetal);
             archTop.position.set(0, archHeight/2 + 0.3, 0); archTop.rotation.z = Math.PI; group.add(archTop);
 
             const ringGeo = new THREE.TorusGeometry(0.55, 0.05, 8, 16);
@@ -902,7 +902,7 @@
                 const ringL = new THREE.Mesh(ringGeo, matNeonWhite); ringL.rotation.x = Math.PI/2; ringL.position.set(-archWidth/2, y + 0.3, 0); group.add(ringL); 
                 const ringR = new THREE.Mesh(ringGeo, matNeonWhite); ringR.rotation.x = Math.PI/2; ringR.position.set(archWidth/2, y + 0.3, 0); group.add(ringR); 
             }
-            const archNeon = new THREE.Mesh(new THREE.TorusGeometry(archWidth/2, 0.05, 8, 24, Math.PI), matNeonWhite); 
+            const archNeon = new THREE.Mesh(new THREE.TorusGeometry(archWidth/2, 0.05, 8, 32, Math.PI), matNeonWhite); 
             archNeon.position.set(0, archHeight/2 + 0.3, 0.6); archNeon.rotation.z = Math.PI; group.add(archNeon); 
 
             const portalW = archWidth - 1; const portalH = archHeight + (archWidth/2) - 1; 
@@ -1034,7 +1034,7 @@
             // MOVIMIENTO MÓVIL (JOYSTICKS)
             if (isMobile) {
                 if (joyL.active) {
-                    const speed = 20.0 * delta; 
+                    const speed = 15.0 * delta; // CAMBIO VELOCIDAD
                     const dir = new THREE.Vector3();
                     camera.getWorldDirection(dir);
                     dir.y = 0; dir.normalize();
@@ -1048,7 +1048,13 @@
 
                 if (joyR.active) {
                     const rotSpeed = 2.0 * delta;
+                    // Rotar cámara (Yaw - izquierda/derecha)
                     camera.rotation.y -= joyR.current.x * rotSpeed;
+                    
+                    // Rotar cámara (Pitch - arriba/abajo) con clamp
+                    camera.rotation.x -= joyR.current.y * rotSpeed;
+                    // Limitar la rotación vertical para no dar la vuelta completa (aprox 80 grados arriba/abajo)
+                    camera.rotation.x = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, camera.rotation.x));
                 }
 
             } else {
