@@ -74,7 +74,7 @@
         .key { border: 1px solid #ff4400; padding: 2px 8px; border-radius: 4px; font-weight: bold; color: #ff4400; }
 
         #start-btn {
-            margin-top: 50px; padding: 20px 70px; font-size: 3rem; font-family: 'Teko', sans-serif;
+            margin-top: 50px; padding: 15px 50px; font-size: 2.5rem; font-family: 'Teko', sans-serif;
             background: #ff4400; border: none; color: #000; cursor: pointer; font-weight: 700; 
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-transform: uppercase; letter-spacing: 4px; box-shadow: 0 0 40px rgba(255, 68, 0, 0.4);
@@ -276,14 +276,18 @@
             <img id="logo-right" class="corner-logo" src="img/Logo02.png" alt="Logo Derecha">
         </div>
 
-        <img id="main-logo" src="img/texto_black.png" alt="LLEGÓ EL BLACK FRIDAY">
+        <img id="main-logo" src="img/texto_black.png" alt="LLEGÓ EL BLACK FRIDAY" style="cursor: pointer;" onclick="window.location.href='https://wa.link/f86xlv'">
         <h3 id="main-subtitle">PROGRAMAS, CURSOS Y MEMBRESÍA</h3>
 
         <div class="instructions">
             <p><span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span> MOVERSE &nbsp;|&nbsp; MOUSE - MIRAR &nbsp;|&nbsp; CLIC - ABRIR</p>
         </div>
 
-        <button id="start-btn">¿ESTÁS LISTO?</button>
+        <div>
+            <button id="start-btn">Iniciar Recorrido</button>
+            <button id="start-btn" style="margin-left: 40px;" onclick="window.location.href='https://wa.link/f86xlv'">ACCEDER A LA OFERTA</button>
+        </div>
+
     </div>
 
     <!-- ELEMENTOS DEL JUEGO 3D -->
